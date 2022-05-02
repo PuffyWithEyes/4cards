@@ -1,6 +1,6 @@
 # Script for python version 3.9
 from aiogram import Bot, Dispatcher, executor, types
-from config import TOKEN
+from bot.config import TOKEN
 from aiogram.dispatcher.filters import Text
 import data.markup as nav
 from aiogram.dispatcher import FSMContext
@@ -56,7 +56,7 @@ async def delete_user(message: types.Message):
 async def cancel_action(message: types.Message, state: FSMContext):
     """ Function for cancel your action """
     await state.reset_state()
-    await message.answer(txt.CANCEL_TEXT)
+    await message.answer(txt.CANCEL_TEXT, reply_markup=nav.main_menu)
 
 
 @dp.message_handler(Text(equals='🔄Вернуться назад'))
@@ -102,6 +102,7 @@ async def do_report(message: types.Message, state: FSMContext):
         await message.reply(txt.ELSE_TEXT)
 
 
+# Додумать как вытащить значение s отсюда для того чтобы его внести его в БД
 @dp.message_handler(state=states.ReportShareVK.s)
 async def check_vk(message: types.Message, state: FSMContext):
     """ Function for check matches """
@@ -114,19 +115,18 @@ async def check_vk(message: types.Message, state: FSMContext):
         await state.finish()
         await message.answer(txt.BACK_TEXT, reply_markup=nav.selections_menu)
         
-    elif 22 < len(s) < 129 and (s[0:17] == txt.VK_CM or s[0:16] == txt.VK_CMN or s[0:15] == txt.VK_C or s[0:14] ==
+    elif 15 < len(s) < 129 and (s[0:17] == txt.VK_CM or s[0:16] == txt.VK_CMN or s[0:15] == txt.VK_C or s[0:14] ==
                                 txt.VK_CN):
         matches = connect.find_matches(mean=s, column='share_vk')
         if matches[0]:
             await state.finish()
             await states.YesNo.y.set()
-            await states.No.temp.set(s)
-            print(states.No.temp(s))
             await message.reply(f'{txt.USER_FIND_TEXT_P1} <b>{str(matches[1]).lstrip("(").rstrip(",)")}</b>'
                                 f'{txt.USER_FIND_TEXT_P2}', reply_markup=nav.selections_menu)
         else:
             await state.finish()
-            await message.reply(txt.USER_NFIND_TEXT, reply_markup=nav.selections_menu)
+            await states.YesNo.y.set()
+            await message.reply(txt.USER_NFIND_TEXT, reply_markup=nav.yesno_menu)
 
     else:
         await message.reply(txt.WRONG_TEXT, reply_markup=nav.selections_menu)
@@ -153,6 +153,7 @@ async def check_tg(message: types.Message, state: FSMContext):
                                 f'{txt.USER_FIND_TEXT_P2}', reply_markup=nav.selections_menu)
         else:
             await state.finish()
+            await states.YesNo.y.set()
             await message.reply(txt.USER_NFIND_TEXT, reply_markup=nav.yesno_menu)
 
     else:
@@ -169,21 +170,21 @@ async def add_info(message: types.Message, state: FSMContext):
     elif y == '👎Нет':
         await state.finish()
         await states.No.n.set()
-        await message.answer(txt.DOC_TEXT, reply_markup=nav.break_menu)
+        await message.answer(txt.DOC_TEXT, reply_markup=nav.o_cancel_menu)
 
 
 @dp.message_handler(state=states.No.n)
 async def add_docs(message: types.Message, state: FSMContext):
     """ This function add proofs in database """
     n = message.text
-    if n == '🛑Отменить подачу жалобы':
+    if n == '❌Отменить действие':
         await state.finish()
-        await message.answer(txt.BACK_TEXT, reply_markup=nav.main_menu)
-    elif len(n) < 256 and (n[0:24] == txt.YOUTUBE_C or n[0:23] == txt.YOUTUBE_CN or n[0:22] == txt.YOUTUBE_CM or n[0:21]
-                         == txt.YOUTUBE_CMN):
+        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.main_menu)
+    elif 22 < len(n) < 256 and (n[0:24] == txt.YOUTUBE_C or n[0:23] == txt.YOUTUBE_CN or n[0:22] == txt.YOUTUBE_CM or
+                                n[0:21] == txt.YOUTUBE_CMN):
         await state.finish()
         await states.Data.d.set()
-        add.add_where(value=n, doc=None, column='docers')
+        add.add_where(value=n, doc=False, column='docers')
         await message.answer(txt.DOCS_TEXT)
     else:
         await message.reply(txt.WRONG_TEXT)

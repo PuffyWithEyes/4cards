@@ -20,11 +20,11 @@ class FindUser(Connect):
             return [find, user_id]
 
 
-class AddUser(Connect, FindUser):
+class AddUser(FindUser):
     def add_where(self, value, doc, column: str):
         self._connect()
         with self.connection.cursor() as cursor:
-            if doc:
+            if not doc:
                 cursor.execute(
                     f"""INSERT INTO cards_report ({column}) VALUES ('{value}');"""
                 )

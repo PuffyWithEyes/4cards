@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 
-load_dotenv('.env')
+load_dotenv('../con_db/.env')
 
 TOKEN = os.environ['TOKEN']
 HOST = os.environ['HOST']

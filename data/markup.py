@@ -16,7 +16,6 @@ btn_delete = KeyboardButton('➖Подать жалобу на удаление 
 btn_back = KeyboardButton('🔄Вернуться назад')
 btn_yes = KeyboardButton('👍Да')
 btn_no = KeyboardButton('👎Нет')
-btn_break = KeyboardButton('🛑Отменить подачу жалобы')
 
 
 main_menu = ReplyKeyboardMarkup(resize_keyboard=True).add(btn_search, btn_report, btn_info)
@@ -26,4 +25,4 @@ report_menu = ReplyKeyboardMarkup(resize_keyboard=True).add(btn_VK, btn_TG, btn_
 cancel_menu = ReplyKeyboardMarkup(resize_keyboard=True).add(btn_back, btn_cancel)
 selections_menu = ReplyKeyboardMarkup(resize_keyboard=True).add(btn_add, btn_delete, btn_back)
 yesno_menu = ReplyKeyboardMarkup(resize_keyboard=True).add(btn_yes, btn_no)
-break_menu = ReplyKeyboardMarkup(resize_keyboard=True).add(btn_break)
+o_cancel_menu = ReplyKeyboardMarkup(resize_keyboard=True).add(btn_cancel)
