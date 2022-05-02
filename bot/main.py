@@ -5,7 +5,7 @@ from aiogram.dispatcher.filters import Text
 import data.markup as nav
 from aiogram.dispatcher import FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from con_db.actions_db import FindUser
+from con_db.actions_db import FindUser, AddUser
 import states
 import data.text as txt
 
@@ -114,11 +114,14 @@ async def check_vk(message: types.Message, state: FSMContext):
         await state.finish()
         await message.answer(txt.BACK_TEXT, reply_markup=nav.selections_menu)
         
-    elif len(s) < 129:
+    elif 22 < len(s) < 129 and (s[0:17] == txt.VK_CM or s[0:16] == txt.VK_CMN or s[0:15] == txt.VK_C or s[0:14] ==
+                                txt.VK_CN):
         matches = connect.find_matches(mean=s, column='share_vk')
         if matches[0]:
             await state.finish()
             await states.YesNo.y.set()
+            await states.No.temp.set(s)
+            print(states.No.temp(s))
             await message.reply(f'{txt.USER_FIND_TEXT_P1} <b>{str(matches[1]).lstrip("(").rstrip(",)")}</b>'
                                 f'{txt.USER_FIND_TEXT_P2}', reply_markup=nav.selections_menu)
         else:
@@ -126,7 +129,7 @@ async def check_vk(message: types.Message, state: FSMContext):
             await message.reply(txt.USER_NFIND_TEXT, reply_markup=nav.selections_menu)
 
     else:
-        await message.reply(txt.LONG_TEXT, reply_markup=nav.selections_menu)
+        await message.reply(txt.WRONG_TEXT, reply_markup=nav.selections_menu)
 
 
 @dp.message_handler(state=states.ReportIDTG.i)
@@ -153,20 +156,40 @@ async def check_tg(message: types.Message, state: FSMContext):
             await message.reply(txt.USER_NFIND_TEXT, reply_markup=nav.yesno_menu)
 
     else:
-        await message.reply(txt.LONG_TEXT, reply_markup=nav.selections_menu)
+        await message.reply(txt.WRONG_TEXT, reply_markup=nav.selections_menu)
 
 
 @dp.message_handler(state=states.YesNo.y)
 async def add_info(message: types.Message, state: FSMContext):
+    """ Function for ask user about info """
     y = message.text
     if y == '👍Да':
         await state.finish()
         await message.answer(txt.YES_TEXT, reply_markup=nav.report_menu)
     elif y == '👎Нет':
         await state.finish()
-        await message.answer(txt.DOC_TEXT)
+        await states.No.n.set()
+        await message.answer(txt.DOC_TEXT, reply_markup=nav.break_menu)
+
+
+@dp.message_handler(state=states.No.n)
+async def add_docs(message: types.Message, state: FSMContext):
+    """ This function add proofs in database """
+    n = message.text
+    if n == '🛑Отменить подачу жалобы':
+        await state.finish()
+        await message.answer(txt.BACK_TEXT, reply_markup=nav.main_menu)
+    elif len(n) < 256 and (n[0:24] == txt.YOUTUBE_C or n[0:23] == txt.YOUTUBE_CN or n[0:22] == txt.YOUTUBE_CM or n[0:21]
+                         == txt.YOUTUBE_CMN):
+        await state.finish()
+        await states.Data.d.set()
+        add.add_where(value=n, doc=None, column='docers')
+        await message.answer(txt.DOCS_TEXT)
+    else:
+        await message.reply(txt.WRONG_TEXT)
 
 
 if __name__ == '__main__':
     connect = FindUser()
+    add = AddUser()
     executor.start_polling(dp)

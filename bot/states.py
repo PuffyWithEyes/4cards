@@ -32,3 +32,12 @@ class ID(StatesGroup):
 
 class YesNo(StatesGroup):
     y = State()
+
+
+class No(StatesGroup):
+    n = State()
+    temp = State()
+
+
+class Data(StatesGroup):
+    d = State()
