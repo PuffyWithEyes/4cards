@@ -19,32 +19,57 @@ class FindUser(Connect):
             self._close_connection()
             return [find, user_id]
 
-
-class AddUser(FindUser):
-    def add_info(self, value, column: str):
+    def find_matches_one(self, data, find_column: str, table: str, where_column: str):
+        """ Function for find matches in 1 column """
         self._connect()
         with self.connection.cursor() as cursor:
             cursor.execute(
-                f"""INSERT INTO cards_report ({column}) VALUES ('{value}');"""
+                f"""SELECT {find_column} FROM {table} WHERE {where_column}='{data}';"""
+            )
+            user_data = cursor.fetchone()
+
+        self._close_connection()
+        return user_data
+
+
+class AddUser(Connect):
+    def add_info(self, value, column: str, table: str):
+        """ Function for add info in table to 1 column """
+        self._connect()
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                f"""INSERT INTO {table} ({column}) VALUES ('{value}');"""
             )
 
         self._close_connection()
 
-    def add_where(self, value, where_value, where: str, column: str):
+    def add_where(self, value, where_value, where_column: str, insert_column: str, table: str):
+        """ Function for add info in table to a specific line """
         self._connect()
         with self.connection.cursor() as cursor:
             cursor.execute(
-                f"""INSERT INTO cards_report ({column}) VALUES ({value}) WHERE {where}='{where_value}';'"""
+                f"""INSERT INTO {table} ({insert_column}) VALUES ({value}) WHERE {where_column}='{where_value}';'"""
             )
 
         self._close_connection()
 
-    def add_two(self, first_value, second_value, first_column: str, second_column: str):
+    def add_two(self, first_value, second_value, first_column: str, second_column: str, table: str):
+        """ Function for add info in table to 2 columns """
         self._connect()
         with self.connection.cursor() as cursor:
             cursor.execute(
-                f"""INSERT INTO cards_report ({first_column}, {second_column}) VALUES ('{first_value}', 
-                '{second_value}');"""
+                f"""INSERT INTO {table} ({first_column}, {second_column}) VALUES ('{first_value}', '{second_value}');"""
+            )
+
+        self._close_connection()
+
+
+class DeleteInfo(Connect):
+    def delete_where(self, data, table: str, column: str):
+        self._connect()
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                f"""DELETE FROM {table} WHERE {column}='{data}';"""
             )
 
         self._close_connection()

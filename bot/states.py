@@ -8,7 +8,6 @@ class DoReport(StatesGroup):
 
 class ReportShareVK(StatesGroup):
     s = State()
-    message = State()
 
 
 class ReportIDTG(StatesGroup):

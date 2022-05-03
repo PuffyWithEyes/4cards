@@ -5,9 +5,10 @@ from aiogram.dispatcher.filters import Text
 import data.markup as nav
 from aiogram.dispatcher import FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from con_db.actions_db import FindUser, AddUser
+from con_db.actions_db import FindUser, AddUser, DeleteInfo
 import states
 import data.text as txt
+from con_db.ClearMessages import ClearMessages
 
 
 # Global settings for the bot
@@ -59,7 +60,6 @@ async def do_report(message: types.Message, state: FSMContext):
     if r == '⛓Проверить ссылку во ВКонтакте':
         await state.finish()
         await states.ReportShareVK.s.set()
-        await states.ReportShareVK.message.set()
         await message.reply(txt.VK_TEXT, reply_markup=nav.cancel_menu)
 
     elif r == '🆔Проверить по ID в Telegram':
@@ -96,8 +96,7 @@ async def do_report(message: types.Message, state: FSMContext):
         await message.reply(txt.ELSE_TEXT)
 
 
-# Додумать как вытащить значение s отсюда для того чтобы его внести его в БД
-@dp.message_handler(state=(states.ReportShareVK.s, states.ReportShareVK.message), content_types=types.ContentTypes.TEXT)
+@dp.message_handler(state=states.ReportShareVK.s)
 async def check_vk(message: types.Message, state: FSMContext):
     """ Function for check matches """
     s = message.text
@@ -110,8 +109,11 @@ async def check_vk(message: types.Message, state: FSMContext):
         await message.answer(txt.BACK_TEXT, reply_markup=nav.selections_menu)
         
     elif 15 < len(s) < 129 and (s[0:17] == txt.VK_CM or s[0:16] == txt.VK_CMN or s[0:15] == txt.VK_C or s[0:14] ==
-                                txt.VK_CN):
+                                txt.VK_CN) and s.find("'") < 0:
         matches = connect.find_matches(mean=s, column='share_vk')
+        add.add_two(first_value=message.from_user.id, second_value=s, first_column='user_id', second_column='message',
+                    table='messages')
+
         if matches[0]:
             await state.finish()
             await states.YesNoVK.y.set()
@@ -119,7 +121,6 @@ async def check_vk(message: types.Message, state: FSMContext):
                                 f'{txt.USER_FIND_TEXT_P2}', reply_markup=nav.selections_menu)
         else:
             await state.finish()
-            await state.update_data(data=s)
             await states.YesNoVK.y.set()
             await message.reply(txt.USER_NFIND_TEXT, reply_markup=nav.yesno_menu)
 
@@ -133,6 +134,7 @@ async def ask_info_vk(message: types.Message, state: FSMContext):
     y = message.text
     if y == '👍Да':
         await state.finish()
+        delete.delete_where(data=message.from_user.id, table='messages', column='user_id')
         await message.answer(txt.YES_TEXT, reply_markup=nav.report_menu)
 
     elif y == '👎Нет':
@@ -141,20 +143,24 @@ async def ask_info_vk(message: types.Message, state: FSMContext):
         await message.answer(txt.DOC_TEXT, reply_markup=nav.o_cancel_menu)
 
 
-@dp.message_handler(state=(states.NoVK.n, states.ReportShareVK.message), content_types=types.ContentTypes.TEXT)
+@dp.message_handler(state=states.NoVK.n)
 async def add_docs_vk(message: types.Message, state: FSMContext):
     """ This function add proofs in database """
     n = message.text
-    d = await state.get_data()
-    data = d['data']
     if n == '❌Отменить действие':
         await state.finish()
+        delete.delete_where(data=message.from_user.id, table='messages', column='user_id')
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.main_menu)
 
     elif 22 < len(n) < 256 and (n[0:24] == txt.YOUTUBE_C or n[0:23] == txt.YOUTUBE_CN or n[0:22] == txt.YOUTUBE_CM or
-                                n[0:21] == txt.YOUTUBE_CMN):
+                                n[0:21] == txt.YOUTUBE_CMN) and n.find("'") < 0:
         await state.finish()
-        add.add_two(first_value=n, second_value=data, first_column='docers', second_column='share_vk')
+        data = str(connect.find_matches_one(data=message.from_user.id, find_column='message', table='messages',
+                                            where_column='user_id')).lstrip("(('").rstrip(',)').strip()
+        type(data)
+        add.add_two(first_value=n, second_value=data, first_column='docers', second_column='share_vk',
+                    table='cards_report')
+        delete.delete_where(data=message.from_user.id, table='messages', column='start_id')
         await message.answer(txt.DOCS_TEXT, reply_markup=nav.main_menu)
 
     else:
@@ -173,7 +179,7 @@ async def check_tg(message: types.Message, state: FSMContext):
         await state.finish()
         await message.answer(txt.BACK_TEXT, reply_markup=nav.selections_menu)
 
-    elif len(s) < 65:
+    elif len(s) < 65 and s.find("'") < 0:
         matches = connect.find_matches(mean=s, column='share_tg')
         if matches[0]:
             await state.finish()
@@ -239,4 +245,7 @@ async def back_actions(message: types.Message, state: FSMContext):
 if __name__ == '__main__':
     connect = FindUser()
     add = AddUser()
+    delete = DeleteInfo()
+    ClearMessages()
+    print('[INFO] Modules launched successfully!')
     executor.start_polling(dp)
