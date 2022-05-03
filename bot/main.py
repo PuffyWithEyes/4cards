@@ -111,8 +111,6 @@ async def check_vk(message: types.Message, state: FSMContext):
     elif 15 < len(s) < 129 and (s[0:17] == txt.VK_CM or s[0:16] == txt.VK_CMN or s[0:15] == txt.VK_C or s[0:14] ==
                                 txt.VK_CN) and s.find("'") < 0:
         matches = connect.find_matches(mean=s, column='share_vk')
-        add.add_two(first_value=message.from_user.id, second_value=s, first_column='user_id', second_column='message',
-                    table='messages')
 
         if matches[0]:
             await state.finish()
@@ -122,6 +120,8 @@ async def check_vk(message: types.Message, state: FSMContext):
         else:
             await state.finish()
             await states.YesNoVK.y.set()
+            add.add_two(first_value=message.from_user.id, second_value=s, first_column='user_id',
+                        second_column='message', table='messages')
             await message.reply(txt.USER_NFIND_TEXT, reply_markup=nav.yesno_menu)
 
     else:
@@ -156,11 +156,10 @@ async def add_docs_vk(message: types.Message, state: FSMContext):
                                 n[0:21] == txt.YOUTUBE_CMN) and n.find("'") < 0:
         await state.finish()
         data = str(connect.find_matches_one(data=message.from_user.id, find_column='message', table='messages',
-                                            where_column='user_id')).lstrip("(('").rstrip(',)').strip()
-        type(data)
+                                            where_column='user_id')).lstrip("('").rstrip("',)").strip()
         add.add_two(first_value=n, second_value=data, first_column='docers', second_column='share_vk',
                     table='cards_report')
-        delete.delete_where(data=message.from_user.id, table='messages', column='start_id')
+        delete.delete_where(data=message.from_user.id, table='messages', column='user_id')
         await message.answer(txt.DOCS_TEXT, reply_markup=nav.main_menu)
 
     else:
@@ -170,24 +169,27 @@ async def add_docs_vk(message: types.Message, state: FSMContext):
 @dp.message_handler(state=states.ReportIDTG.i)
 async def check_tg(message: types.Message, state: FSMContext):
     """ Function for check matches """
-    s = message.text
-    if s == '❌Отменить действие':
+    i = message.text
+    if i == '❌Отменить действие':
         await state.finish()
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
 
-    elif s == '🔄Вернуться назад':
+    elif i == '🔄Вернуться назад':
         await state.finish()
         await message.answer(txt.BACK_TEXT, reply_markup=nav.selections_menu)
 
-    elif len(s) < 65 and s.find("'") < 0:
-        matches = connect.find_matches(mean=s, column='share_tg')
+    elif len(i) < 65 and i.find("'") < 0:
+        matches = connect.find_matches(mean=i, column='share_tg')
+
         if matches[0]:
             await state.finish()
             await states.YesNoTG.y.set()
-            await message.reply(f'{txt.USER_FIND_TEXT_P1}<b>{str(matches[1]).lstrip("(").rstrip(",)")}</b>'
+            await message.reply(f'{txt.USER_FIND_TEXT_P1} <b>{str(matches[1]).lstrip("(").rstrip(",)")}</b>'
                                 f'{txt.USER_FIND_TEXT_P2}', reply_markup=nav.selections_menu)
         else:
             await state.finish()
+            add.add_two(first_value=message.from_user.id, second_value=i, first_column='user_id',
+                        second_column='message', table='messages')
             await states.YesNoTG.y.set()
             await message.reply(txt.USER_NFIND_TEXT, reply_markup=nav.yesno_menu)
 
@@ -215,13 +217,82 @@ async def add_docs_tg(message: types.Message, state: FSMContext):
     n = message.text
     if n == '❌Отменить действие':
         await state.finish()
+        delete.delete_where(data=message.from_user.id, table='messages', column='user_id')
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.main_menu)
 
     elif 22 < len(n) < 256 and (n[0:24] == txt.YOUTUBE_C or n[0:23] == txt.YOUTUBE_CN or n[0:22] == txt.YOUTUBE_CM or
-                                n[0:21] == txt.YOUTUBE_CMN):
+                                n[0:21] == txt.YOUTUBE_CMN) and n.find("'") < 0:
         await state.finish()
-        add.add_info(value=n, column='docers')
-        add.add_where(value=states.NoTG.temp, where_value=n, where='docers', column='share_tg')
+        data = str(connect.find_matches_one(data=message.from_user.id, find_column='message', table='messages',
+                                            where_column='user_id')).lstrip("('").rstrip("',)").strip()
+        add.add_two(first_value=n, second_value=data, first_column='docers', second_column='share_tg',
+                    table='cards_report')
+        delete.delete_where(data=message.from_user.id, table='messages', column='user_id')
+        await message.answer(txt.DOCS_TEXT, reply_markup=nav.main_menu)
+
+    else:
+        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+
+
+@dp.message_handler(state=states.CardNumber.c)
+async def check_card(message: types.Message, state: FSMContext):
+    """ Function for check matches """
+    c = message.text
+    if c == '❌Отменить действие':
+        await state.finish()
+        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
+
+    elif c == '🔄Вернуться назад':
+        await state.finish()
+        await message.answer(txt.BACK_TEXT, reply_markup=nav.selections_menu)
+
+    elif len(c) < 17 and c.find("'") < 0:
+        matches = connect.find_matches(mean=c, column='cnumber')
+
+        if matches[0]:
+            await state.finish()
+            await states.YesNoCard.y.set()
+            await message.reply(f'{txt.USER_FIND_TEXT_P1} <b>{str(matches[1]).lstrip("(").rstrip(",)")}</b>'
+                                f'{txt.USER_FIND_TEXT_P2}', reply_markup=nav.selections_menu)
+        else:
+            await state.finish()
+            add.add_two(first_value=message.from_user.id, second_value=c, first_column='user_id',
+                        second_column='message', table='messages')
+            await states.YesNoCard.y.set()
+            await message.reply(txt.USER_NFIND_TEXT, reply_markup=nav.yesno_menu)
+
+
+@dp.message_handler(state=states.YesNoCard.y)
+async def add_info_card(message: types.Message, state: FSMContext):
+    """ Function for ask user about info """
+    y = message.text
+    if y == '👍Да':
+        await state.finish()
+        await message.answer(txt.YES_TEXT, reply_markup=nav.report_menu)
+
+    elif y == '👎Нет':
+        await state.finish()
+        await states.NoCard.n.set()
+        await message.answer(txt.DOC_TEXT, reply_markup=nav.o_cancel_menu)
+
+
+@dp.message_handler(state=states.NoCard.n)
+async def add_docs_card(message: types.Message, state: FSMContext):
+    """ This function add proofs in database """
+    n = message.text
+    if n == '❌Отменить действие':
+        await state.finish()
+        delete.delete_where(data=message.from_user.id, table='messages', column='user_id')
+        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.main_menu)
+
+    elif 22 < len(n) < 256 and (n[0:24] == txt.YOUTUBE_C or n[0:23] == txt.YOUTUBE_CN or n[0:22] == txt.YOUTUBE_CM or
+                                n[0:21] == txt.YOUTUBE_CMN) and n.find("'") < 0:
+        await state.finish()
+        data = str(connect.find_matches_one(data=message.from_user.id, find_column='message', table='messages',
+                                            where_column='user_id')).lstrip("('").rstrip("',)").strip()
+        add.add_two(first_value=n, second_value=data, first_column='docers', second_column='cnumber',
+                    table='cards_report')
+        delete.delete_where(data=message.from_user.id, table='messages', column='user_id')
         await message.answer(txt.DOCS_TEXT, reply_markup=nav.main_menu)
 
     else:

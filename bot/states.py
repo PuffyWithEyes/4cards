@@ -46,5 +46,9 @@ class NoTG(StatesGroup):
     n = State()
 
 
-class Test(StatesGroup):
-    t = State()
+class YesNoCard(StatesGroup):
+    y = State()
+
+
+class NoCard(StatesGroup):
+    n = State()
