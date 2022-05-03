@@ -21,25 +21,30 @@ class FindUser(Connect):
 
 
 class AddUser(FindUser):
-    def add_where(self, value, doc, column: str):
-        self._connect()
-        with self.connection.cursor() as cursor:
-            if not doc:
-                cursor.execute(
-                    f"""INSERT INTO cards_report ({column}) VALUES ('{value}');"""
-                )
-            else:
-                cursor.execute(
-                    f"""INSERT INTO cards_report ({column}, docers) VALUES ('{value}', {doc});"""
-                )
-
-        self._close_connection()
-
-    def _add_share_tg(self, share):
+    def add_info(self, value, column: str):
         self._connect()
         with self.connection.cursor() as cursor:
             cursor.execute(
-                f"""INSERT INTO cards_true (share_vk) VALUES ('{share}');"""
+                f"""INSERT INTO cards_report ({column}) VALUES ('{value}');"""
+            )
+
+        self._close_connection()
+
+    def add_where(self, value, where_value, where: str, column: str):
+        self._connect()
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                f"""INSERT INTO cards_report ({column}) VALUES ({value}) WHERE {where}='{where_value}';'"""
+            )
+
+        self._close_connection()
+
+    def add_two(self, first_value, second_value, first_column: str, second_column: str):
+        self._connect()
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                f"""INSERT INTO cards_report ({first_column}, {second_column}) VALUES ('{first_value}', 
+                '{second_value}');"""
             )
 
         self._close_connection()

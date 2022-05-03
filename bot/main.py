@@ -52,20 +52,6 @@ async def delete_user(message: types.Message):
     await message.answer(txt.DELETE_TEXT)
 
 
-@dp.message_handler(Text(equals='❌Отменить действие'))
-async def cancel_action(message: types.Message, state: FSMContext):
-    """ Function for cancel your action """
-    await state.reset_state()
-    await message.answer(txt.CANCEL_TEXT, reply_markup=nav.main_menu)
-
-
-@dp.message_handler(Text(equals='🔄Вернуться назад'))
-async def back_actions(message: types.Message, state: FSMContext):
-    """ Return your actions """
-    await state.reset_state()
-    await message.answer(txt.BACK_TEXT, reply_markup=nav.main_menu)
-
-
 @dp.message_handler(state=states.DoReport.r)
 async def do_report(message: types.Message, state: FSMContext):
     """ Function of report """
@@ -73,37 +59,45 @@ async def do_report(message: types.Message, state: FSMContext):
     if r == '⛓Проверить ссылку во ВКонтакте':
         await state.finish()
         await states.ReportShareVK.s.set()
+        await states.ReportShareVK.message.set()
         await message.reply(txt.VK_TEXT, reply_markup=nav.cancel_menu)
+
     elif r == '🆔Проверить по ID в Telegram':
         await state.finish()
         await states.ReportIDTG.i.set()
         await message.reply(txt.TG_TEXT)
+
     elif r == '💳Проверить по номеру карты':
         await state.finish()
         await states.CardNumber.c.set()
         await message.reply(txt.CARD_TEXT)
+
     elif r == '📞Проверить по номеру телефона':
         await state.finish()
         await states.TelephoneNumber.t.set()
         await message.reply(txt.TELEPHONE_TEXT)
+
     elif r == '🏠Проверить по адресу':
         await state.finish()
         await states.Address.a.set()
         await message.reply(txt.TELEPHONE_TEXT)
+
     elif r == '🧾У меня есть ID мошенника из базы данных':
         await state.finish()
         await states.ID.i.set()
         await message.reply(txt.ID_TEXT)
+
     elif r == '🔄Вернуться назад':
         await state.finish()
         await state.reset_state()
         await message.answer(txt.BACK_TEXT, reply_markup=nav.selections_menu)
+
     else:
         await message.reply(txt.ELSE_TEXT)
 
 
 # Додумать как вытащить значение s отсюда для того чтобы его внести его в БД
-@dp.message_handler(state=states.ReportShareVK.s)
+@dp.message_handler(state=(states.ReportShareVK.s, states.ReportShareVK.message), content_types=types.ContentTypes.TEXT)
 async def check_vk(message: types.Message, state: FSMContext):
     """ Function for check matches """
     s = message.text
@@ -120,16 +114,51 @@ async def check_vk(message: types.Message, state: FSMContext):
         matches = connect.find_matches(mean=s, column='share_vk')
         if matches[0]:
             await state.finish()
-            await states.YesNo.y.set()
+            await states.YesNoVK.y.set()
             await message.reply(f'{txt.USER_FIND_TEXT_P1} <b>{str(matches[1]).lstrip("(").rstrip(",)")}</b>'
                                 f'{txt.USER_FIND_TEXT_P2}', reply_markup=nav.selections_menu)
         else:
             await state.finish()
-            await states.YesNo.y.set()
+            await state.update_data(data=s)
+            await states.YesNoVK.y.set()
             await message.reply(txt.USER_NFIND_TEXT, reply_markup=nav.yesno_menu)
 
     else:
-        await message.reply(txt.WRONG_TEXT, reply_markup=nav.selections_menu)
+        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+
+
+@dp.message_handler(state=states.YesNoVK.y)
+async def ask_info_vk(message: types.Message, state: FSMContext):
+    """ Function for ask user about info """
+    y = message.text
+    if y == '👍Да':
+        await state.finish()
+        await message.answer(txt.YES_TEXT, reply_markup=nav.report_menu)
+
+    elif y == '👎Нет':
+        await state.finish()
+        await states.NoVK.n.set()
+        await message.answer(txt.DOC_TEXT, reply_markup=nav.o_cancel_menu)
+
+
+@dp.message_handler(state=(states.NoVK.n, states.ReportShareVK.message), content_types=types.ContentTypes.TEXT)
+async def add_docs_vk(message: types.Message, state: FSMContext):
+    """ This function add proofs in database """
+    n = message.text
+    d = await state.get_data()
+    data = d['data']
+    if n == '❌Отменить действие':
+        await state.finish()
+        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.main_menu)
+
+    elif 22 < len(n) < 256 and (n[0:24] == txt.YOUTUBE_C or n[0:23] == txt.YOUTUBE_CN or n[0:22] == txt.YOUTUBE_CM or
+                                n[0:21] == txt.YOUTUBE_CMN):
+        await state.finish()
+        add.add_two(first_value=n, second_value=data, first_column='docers', second_column='share_vk')
+        await message.answer(txt.DOCS_TEXT, reply_markup=nav.main_menu)
+
+    else:
+        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
 
 
 @dp.message_handler(state=states.ReportIDTG.i)
@@ -148,46 +177,63 @@ async def check_tg(message: types.Message, state: FSMContext):
         matches = connect.find_matches(mean=s, column='share_tg')
         if matches[0]:
             await state.finish()
-            await states.YesNo.y.set()
+            await states.YesNoTG.y.set()
             await message.reply(f'{txt.USER_FIND_TEXT_P1}<b>{str(matches[1]).lstrip("(").rstrip(",)")}</b>'
                                 f'{txt.USER_FIND_TEXT_P2}', reply_markup=nav.selections_menu)
         else:
             await state.finish()
-            await states.YesNo.y.set()
+            await states.YesNoTG.y.set()
             await message.reply(txt.USER_NFIND_TEXT, reply_markup=nav.yesno_menu)
 
     else:
-        await message.reply(txt.WRONG_TEXT, reply_markup=nav.selections_menu)
+        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
 
 
-@dp.message_handler(state=states.YesNo.y)
-async def add_info(message: types.Message, state: FSMContext):
+@dp.message_handler(state=states.YesNoTG.y)
+async def add_info_tg(message: types.Message, state: FSMContext):
     """ Function for ask user about info """
     y = message.text
     if y == '👍Да':
         await state.finish()
         await message.answer(txt.YES_TEXT, reply_markup=nav.report_menu)
+
     elif y == '👎Нет':
         await state.finish()
-        await states.No.n.set()
+        await states.NoTG.n.set()
         await message.answer(txt.DOC_TEXT, reply_markup=nav.o_cancel_menu)
 
 
-@dp.message_handler(state=states.No.n)
-async def add_docs(message: types.Message, state: FSMContext):
+@dp.message_handler(state=states.NoTG.n)
+async def add_docs_tg(message: types.Message, state: FSMContext):
     """ This function add proofs in database """
     n = message.text
     if n == '❌Отменить действие':
         await state.finish()
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.main_menu)
+
     elif 22 < len(n) < 256 and (n[0:24] == txt.YOUTUBE_C or n[0:23] == txt.YOUTUBE_CN or n[0:22] == txt.YOUTUBE_CM or
                                 n[0:21] == txt.YOUTUBE_CMN):
         await state.finish()
-        await states.Data.d.set()
-        add.add_where(value=n, doc=False, column='docers')
-        await message.answer(txt.DOCS_TEXT)
+        add.add_info(value=n, column='docers')
+        add.add_where(value=states.NoTG.temp, where_value=n, where='docers', column='share_tg')
+        await message.answer(txt.DOCS_TEXT, reply_markup=nav.main_menu)
+
     else:
-        await message.reply(txt.WRONG_TEXT)
+        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+
+
+@dp.message_handler(Text(equals='❌Отменить действие'))
+async def cancel_action(message: types.Message, state: FSMContext):
+    """ Function for cancel your action """
+    await state.reset_state()
+    await message.answer(txt.CANCEL_TEXT, reply_markup=nav.main_menu)
+
+
+@dp.message_handler(Text(equals='🔄Вернуться назад'))
+async def back_actions(message: types.Message, state: FSMContext):
+    """ Return your actions """
+    await state.reset_state()
+    await message.answer(txt.BACK_TEXT, reply_markup=nav.main_menu)
 
 
 if __name__ == '__main__':

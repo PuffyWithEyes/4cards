@@ -8,6 +8,7 @@ class DoReport(StatesGroup):
 
 class ReportShareVK(StatesGroup):
     s = State()
+    message = State()
 
 
 class ReportIDTG(StatesGroup):
@@ -30,14 +31,21 @@ class ID(StatesGroup):
     i = State()
 
 
-class YesNo(StatesGroup):
+class YesNoVK(StatesGroup):
     y = State()
 
 
-class No(StatesGroup):
+class NoVK(StatesGroup):
     n = State()
-    temp = State()
 
 
-class Data(StatesGroup):
-    d = State()
+class YesNoTG(StatesGroup):
+    y = State()
+
+
+class NoTG(StatesGroup):
+    n = State()
+
+
+class Test(StatesGroup):
+    t = State()

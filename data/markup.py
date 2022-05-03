@@ -16,12 +16,13 @@ btn_delete = KeyboardButton('➖Подать жалобу на удаление 
 btn_back = KeyboardButton('🔄Вернуться назад')
 btn_yes = KeyboardButton('👍Да')
 btn_no = KeyboardButton('👎Нет')
+btn_id = KeyboardButton('🧾У меня есть ID мошенника из базы данных')
 
 
 main_menu = ReplyKeyboardMarkup(resize_keyboard=True).add(btn_search, btn_report, btn_info)
 info_menu = ReplyKeyboardMarkup(resize_keyboard=True).add(btn_search, btn_report)
-report_menu = ReplyKeyboardMarkup(resize_keyboard=True).add(btn_VK, btn_TG, btn_card, btn_address, btn_address,
-                                                            btn_back, btn_cancel)
+report_menu = ReplyKeyboardMarkup(resize_keyboard=True).add(btn_VK, btn_TG, btn_card, btn_address, btn_telephone,
+                                                            btn_id, btn_back)
 cancel_menu = ReplyKeyboardMarkup(resize_keyboard=True).add(btn_back, btn_cancel)
 selections_menu = ReplyKeyboardMarkup(resize_keyboard=True).add(btn_add, btn_delete, btn_back)
 yesno_menu = ReplyKeyboardMarkup(resize_keyboard=True).add(btn_yes, btn_no)
