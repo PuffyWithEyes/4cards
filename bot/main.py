@@ -65,27 +65,27 @@ async def do_report(message: types.Message, state: FSMContext):
     elif r == '🆔Проверить по ID в Telegram':
         await state.finish()
         await states.ReportIDTG.i.set()
-        await message.reply(txt.TG_TEXT)
+        await message.reply(txt.TG_TEXT, reply_markup=nav.cancel_menu)
 
     elif r == '💳Проверить по номеру карты':
         await state.finish()
         await states.CardNumber.c.set()
-        await message.reply(txt.CARD_TEXT)
+        await message.reply(txt.CARD_TEXT, reply_markup=nav.cancel_menu)
 
     elif r == '📞Проверить по номеру телефона':
         await state.finish()
         await states.TelephoneNumber.t.set()
-        await message.reply(txt.TELEPHONE_TEXT)
+        await message.reply(txt.TELEPHONE_TEXT, reply_markup=nav.cancel_menu)
 
     elif r == '🏠Проверить по адресу':
         await state.finish()
         await states.Address.a.set()
-        await message.reply(txt.TELEPHONE_TEXT)
+        await message.reply(txt.TELEPHONE_TEXT, reply_markup=nav.cancel_menu)
 
     elif r == '🧾У меня есть ID мошенника из базы данных':
         await state.finish()
         await states.ID.i.set()
-        await message.reply(txt.ID_TEXT)
+        await message.reply(txt.ID_TEXT, reply_markup=nav.cancel_menu)
 
     elif r == '🔄Вернуться назад':
         await state.finish()
@@ -120,6 +120,7 @@ async def check_vk(message: types.Message, state: FSMContext):
         else:
             await state.finish()
             await states.YesNoVK.y.set()
+            delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
             add.add_two(first_value=int(message.from_user.id), second_value=("'" + s + "'"), first_column='user_id',
                         second_column='message', table='messages')
             await message.reply(txt.USER_NFIND_TEXT, reply_markup=nav.yesno_menu)
@@ -191,6 +192,7 @@ async def check_tg(message: types.Message, state: FSMContext):
                                 f'{txt.USER_FIND_TEXT_P2}', reply_markup=nav.selections_menu)
         else:
             await state.finish()
+            delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
             add.add_two(first_value=int(message.from_user.id), second_value=("'" + i + "'"), first_column='user_id',
                         second_column='message', table='messages')
             await states.YesNoTG.y.set()
@@ -253,7 +255,7 @@ async def check_card(message: types.Message, state: FSMContext):
         await state.finish()
         await message.answer(txt.BACK_TEXT, reply_markup=nav.selections_menu)
 
-    elif len(c) < 17 and c.find("'") < 0 and isinstance(int(c), int):
+    elif len(c) == 16 and c.find("'") < 0 and isinstance(int(c), int):
         matches = connect.find_matches(mean=int(c), column='cnumber')
 
         if matches[0]:
@@ -263,6 +265,7 @@ async def check_card(message: types.Message, state: FSMContext):
                                 f'{txt.USER_FIND_TEXT_P2}', reply_markup=nav.selections_menu)
         else:
             await state.finish()
+            delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
             add.add_two(first_value=int(message.from_user.id), second_value=int(c), first_column='user_id',
                         second_column='message', table='messages')
             await states.YesNoCard.y.set()
@@ -335,6 +338,7 @@ async def check_telephone(message: types.Message, state: FSMContext):
                                 f'{txt.USER_FIND_TEXT_P2}', reply_markup=nav.selections_menu)
         else:
             await state.finish()
+            delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
             add.add_two(first_value=int(message.from_user.id), second_value=("'" + t + "'"), first_column='user_id',
                         second_column='message', table='messages')
             await states.YesNoTelephone.y.set()
@@ -389,12 +393,58 @@ async def add_docs_telephone(message: types.Message, state: FSMContext):
 async def ask_id(message: types.Message, state: FSMContext):
     """ This function ask user about swindler's ID """
     i = message.text
-    # Текст, введите ID мошенника
+    if i == '❌Отменить действие':
+        await state.finish()
+        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
+
+    elif i == '🔄Вернуться назад':
+        await state.finish()
+        await message.answer(txt.BACK_TEXT, reply_markup=nav.selections_menu)
+
+    elif isinstance(int(i), int):
+        if connect.find_matches_one(data=int(i), find_column='id', table='cards_true',
+                                    where_column='id'):
+            await state.finish()
+            await message.answer(txt.DOC_TEXT, reply_markup=nav.o_cancel_menu)
+            delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
+            add.add_two(first_value=int(message.from_user.id), second_value=int(i), first_column='user_id',
+                        second_column='message', table='messages')
+            await states.DocsCard.d.set()
+        else:
+            await message.reply(txt.NO_ID, reply_markup=nav.o_cancel_menu)
+
+    else:
+        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+
+
+@dp.message_handler(state=states.DocsCard.d)
+async def add_docs_card(message: types.Message, state: FSMContext):
+    """ This function add proofs in database """
+    d = message.text
+    if d == '❌Отменить действие':
+        await state.finish()
+        delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
+        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.main_menu)
+
+    elif 22 < len(d) < 256 and (d[0:24] == txt.YOUTUBE_C or d[0:23] == txt.YOUTUBE_CN or d[0:22] == txt.YOUTUBE_CM or
+                                d[0:21] == txt.YOUTUBE_CMN) and d.find("'") < 0:
+        await state.finish()
+        data = str(connect.find_matches_one(data=int(message.from_user.id), find_column='message', table='messages',
+                                            where_column='user_id')).lstrip("('").rstrip("',)").strip()
+        add.add_two(first_value=("'" + d + "'"), second_value=int(data), first_column='docers',
+                    second_column='got_id', table='cards_report')
+        delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
+        await message.answer(txt.DOCS_TEXT, reply_markup=nav.main_menu)
+
+    else:
+        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+
 
 @dp.message_handler(Text(equals='❌Отменить действие'))
 async def cancel_action(message: types.Message, state: FSMContext):
     """ Function for cancel your action """
     await state.reset_state()
+    delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
     await message.answer(txt.CANCEL_TEXT, reply_markup=nav.main_menu)
 
 
@@ -402,6 +452,7 @@ async def cancel_action(message: types.Message, state: FSMContext):
 async def back_actions(message: types.Message, state: FSMContext):
     """ Return your actions """
     await state.reset_state()
+    delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
     await message.answer(txt.BACK_TEXT, reply_markup=nav.main_menu)
 
 

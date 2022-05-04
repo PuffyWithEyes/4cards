@@ -60,3 +60,7 @@ class YesNoTelephone(StatesGroup):
 
 class NoTelephone(StatesGroup):
     n = State()
+
+
+class DocsCard(StatesGroup):
+    d = State()
