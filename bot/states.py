@@ -52,3 +52,11 @@ class YesNoCard(StatesGroup):
 
 class NoCard(StatesGroup):
     n = State()
+
+
+class YesNoTelephone(StatesGroup):
+    y = State()
+
+
+class NoTelephone(StatesGroup):
+    n = State()
