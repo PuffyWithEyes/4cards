@@ -13,6 +13,9 @@ class ClearMessages(Connect):
             cursor.execute(
                 """DELETE FROM messages;"""
             )
+            cursor.execute(
+                """DELETE FROM json;"""
+            )
 
         self._close_connection()
         time.sleep(86400)

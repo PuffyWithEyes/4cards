@@ -64,3 +64,19 @@ class NoTelephone(StatesGroup):
 
 class DocsCard(StatesGroup):
     d = State()
+
+
+class City(StatesGroup):
+    c = State()
+
+
+class Street(StatesGroup):
+    s = State()
+
+
+class Home(StatesGroup):
+    h = State()
+
+
+class Apartaments(StatesGroup):
+    a = State()

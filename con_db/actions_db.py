@@ -43,12 +43,13 @@ class AddUser(Connect):
 
         self._close_connection()
 
-    def add_where(self, value, where_value, where_column: str, insert_column: str, table: str):
+    def add_where(self, value, where_value, where_column: str, insert_column: str, table: str, find_column: str):
         """ Function for add info in table to a specific line """
         self._connect()
         with self.connection.cursor() as cursor:
             cursor.execute(
-                f"""INSERT INTO {table} ({insert_column}) VALUES ({value}) WHERE {where_column}={where_value};'"""
+                f"""INSERT INTO {table} ({insert_column}) VALUES ({value}) ON CONFLICT ({find_column}) WHERE 
+{where_column}={where_value} DO NOTHING;"""
             )
 
         self._close_connection()
