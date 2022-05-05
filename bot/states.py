@@ -78,5 +78,13 @@ class Home(StatesGroup):
     h = State()
 
 
-class Apartaments(StatesGroup):
+class Apartments(StatesGroup):
     a = State()
+
+
+class YesNoJson(StatesGroup):
+    y = State()
+
+
+class NoJson(StatesGroup):
+    n = State()
