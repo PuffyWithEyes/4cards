@@ -10,6 +10,8 @@ import states
 import data.text as txt
 from instruments import strip_all, plus_json
 from con_db.ClearMessages import ClearMessages
+import json
+from con_db.Create import Create
 
 
 # Global settings for the bot
@@ -136,7 +138,8 @@ async def ask_info_vk(message: types.Message, state: FSMContext):
     """ Function for ask user about info """
     y = message.text
     if y == '👍Да':
-        await state.finish()
+        await state.finish()  # После этого не реагирует на кнопки кроме назад
+        await states.DoReport.r.set()
         delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
         await message.answer(txt.YES_TEXT, reply_markup=nav.report_menu)
 
@@ -546,7 +549,8 @@ async def json_apartments(message: types.Message, state: FSMContext):
         else:
             add.add_three(first_value=int(message.from_user.id), second_value=int(a), third_value="'apartments'",
                           first_column='user_id', second_column='value', third_column='key', table='json')
-        matches = connect.find_matches(mean=("'" + plus_json(message) + "'"), column='address')
+        matches = connect.find_matches_where_one(data=("'" + json.dumps(plus_json(message)) + "'"), find_column='address',
+                                                 table='cards_true', where_column='address')  # Ругается на ключевые символы
 
         if matches[0]:
             delete.delete_where(data=int(message.from_user.id), table='json', column='user_id')
@@ -620,5 +624,6 @@ if __name__ == '__main__':
     add = AddUser()
     delete = DeleteInfo()
     ClearMessages()
+    Create()
     print('[INFO] Modules launched successfully!')
     executor.start_polling(dp)
