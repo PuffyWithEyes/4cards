@@ -139,6 +139,7 @@ dmypy.json
 cython_debug/
 
 
+# my config
 .env
 
-power.txt
+user_data.txt

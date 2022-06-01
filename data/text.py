@@ -62,8 +62,10 @@ HOME_TEXT = '🚪Отлично, теперь введите квартиру (�
             ' прочерк "-"):'
 DROP_TABLES_TEXT = '[INFO] Do you want to remove all your data and tables from a PostgreSQL database? If you agree ' \
                    'to the deletion, write: "I fully agree to the deletion of all my tables and the data within ' \
-                   'them." If you do not want to delete all this data, then you can simply press <Enter>:'
+                   'them" If you do not want to delete all this data, then you can simply press <Enter>:'
 PASSWORD_TEXT = '[INFO] Create a password that will be required for global changes in the database structure ' \
                 '(Password must be more than 3 characters): '
 QUESTION_TEXT = '[INFO] Now come up with a key question (The question must contain more than 4 characters): '
-ANSWER_TEXT = 'Excellent! Now write the answer to this question (It must contain more than 1 character): '
+ANSWER_TEXT = '[INFO] Excellent! Now write the answer to this question (It must contain more than 1 character): '
+ACCEPT_DEL_TEXT = '[INFO] If you want to delete everything, then write your password! If you change your mind about ' \
+                  'nulling/deleting, press <Ctrl + C>. If you want to reset your password, write: "Reset": '

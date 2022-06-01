@@ -98,3 +98,23 @@ TABLESPACE pg_default;
 ALTER TABLE IF EXISTS public.json
     OWNER to postgres;
 """
+
+DROP_ADMIN_PANEL = """
+DROP TABLE admin_panel;
+"""
+
+DROP_CARDS_REPORT = """
+DROP TABLE cards_report;
+"""
+
+DROP_CARDS_TRUE = """
+DROP TABLE cards_true;
+"""
+
+DROP_JSON = """
+DROP TABLE json;
+"""
+
+DROP_MESSAGES = """
+DROP TABLE messages;
+"""
