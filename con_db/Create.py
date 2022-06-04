@@ -10,8 +10,6 @@ class Create(Connect):
         with open('../data/user_data.txt') as file:
             reader = file.read()
 
-        print(reader.count('\n'))  # Test
-
         if not reader:
             self._ask_data(text=txt.PASSWORD_TEXT, data_len=3)
             print("[INFO] Don't forget to write down your password!")
@@ -19,11 +17,7 @@ class Create(Connect):
             self._ask_data(text=txt.ANSWER_TEXT, data_len=1)
 
             # self._create_all_tables()
-
-        elif reader.count('\n') != 0 or reader.count('\n') != 3:  # Почему-то выполняется
-            self._clear_txt()
-
-        else:
+        elif reader.count('\n') == 3:
             if input(txt.DROP_TABLES_TEXT).lower() == 'i fully agree to the deletion of all my tables and the data ' \
                                                       'within them':
                 with open('../data/user_data.txt') as file:
@@ -32,13 +26,19 @@ class Create(Connect):
                     answer = file.readline()
                 while True:
                     pass_text = input(txt.ACCEPT_DEL_TEXT)
-                    if str(pass_text) == str(password):
+                    if str(pass_text) == str(password).replace('\n', ''):
                         print('[INFO] Tables will be deleted after 5...', end='')
-                        count = 4
-                        if count != 0:
-                            time.sleep(1)
-                            print(str(count) + '...', end='')
-                            count -= 1
+                        count_1 = 4
+                        time.sleep(1)
+                        while count_1 != 0:
+                            count_2 = 3
+                            print(str(count_1), end='')
+                            while count_2 != 0:
+                                print('.', end='')
+                                count_2 -= 1
+                                time.sleep(0.334)
+                            count_1 -= 1
+                        print('0')
 
                         # self._delete_all_tables()
                         print('[INFO] Tables were deleted successfully!')
@@ -47,6 +47,12 @@ class Create(Connect):
                     elif str(pass_text).lower() == 'reset':
                         self._reset_password(question=str(question), answer=str(answer))
                         break
+
+                    else:
+                        print('[INFO] Password is incorrect, please try again!')
+
+        else:
+            self._clear_txt()
 
     def _delete_all_tables(self):
         """ This function delete all PostgreSQL's tables """

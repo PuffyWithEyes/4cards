@@ -620,10 +620,10 @@ async def back_actions(message: types.Message, state: FSMContext):
 
 
 if __name__ == '__main__':
+    Create()
     connect = FindUser()
     add = AddUser()
     delete = DeleteInfo()
     ClearMessages()
-    Create()
     print('[INFO] Modules launched successfully!')
     executor.start_polling(dp)
