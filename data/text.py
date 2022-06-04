@@ -69,3 +69,4 @@ QUESTION_TEXT = '[INFO] Now come up with a key question (The question must conta
 ANSWER_TEXT = '[INFO] Excellent! Now write the answer to this question (It must contain more than 1 character): '
 ACCEPT_DEL_TEXT = '[INFO] If you want to delete everything, then write your password! If you change your mind about ' \
                   'nulling/deleting, press <Ctrl + C>. If you want to reset your password, write: "Reset": '
+SECURITY_KEY_TEXT = '[INFO] Please answer the security question: '

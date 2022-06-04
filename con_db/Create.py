@@ -1,6 +1,7 @@
 from con_db.Connect import Connect
 import data.sql_tables as sql
 import data.text as txt
+import time
 
 
 class Create(Connect):
@@ -9,27 +10,46 @@ class Create(Connect):
         with open('../data/user_data.txt') as file:
             reader = file.read()
 
+        print(reader.count('\n'))  # Test
+
         if not reader:
             self._ask_data(text=txt.PASSWORD_TEXT, data_len=3)
             print("[INFO] Don't forget to write down your password!")
-
             self._ask_data(text=txt.QUESTION_TEXT, data_len=4)
-
             self._ask_data(text=txt.ANSWER_TEXT, data_len=1)
 
             # self._create_all_tables()
+
+        elif reader.count('\n') != 0 or reader.count('\n') != 3:  # Почему-то выполняется
+            self._clear_txt()
+
         else:
-            if input(txt.DROP_TABLES_TEXT) == 'I fully agree to the deletion of all my tables and the data within them':
+            if input(txt.DROP_TABLES_TEXT).lower() == 'i fully agree to the deletion of all my tables and the data ' \
+                                                      'within them':
                 with open('../data/user_data.txt') as file:
                     password = file.readline()
                     question = file.readline()
                     answer = file.readline()
                 while True:
-                    if input(txt.ACCEPT_DEL_TEXT) == password:
-                        pass
+                    pass_text = input(txt.ACCEPT_DEL_TEXT)
+                    if str(pass_text) == str(password):
+                        print('[INFO] Tables will be deleted after 5...', end='')
+                        count = 4
+                        if count != 0:
+                            time.sleep(1)
+                            print(str(count) + '...', end='')
+                            count -= 1
 
+                        # self._delete_all_tables()
+                        print('[INFO] Tables were deleted successfully!')
+                        exit(0)
+
+                    elif str(pass_text).lower() == 'reset':
+                        self._reset_password(question=str(question), answer=str(answer))
+                        break
 
     def _delete_all_tables(self):
+        """ This function delete all PostgreSQL's tables """
         self._connect()
         with self.connection.cursor() as cursor:
             cursor.execute(sql.DROP_CARDS_REPORT)
@@ -41,6 +61,7 @@ class Create(Connect):
         self._close_connection()
 
     def _create_all_tables(self):
+        """ This function create all PostgreSQL's tables """
         self._connect()
         with self.connection.cursor() as cursor:
             cursor.execute(sql.ADMIN_PANEL)
@@ -52,9 +73,20 @@ class Create(Connect):
         self._close_connection()
 
     def _ask_data(self, text: str, data_len: int):
+        """ There we will ask user about some data """
         while True:
             if self._check_data(data=input(text), data_len=data_len):
                 break
+
+    def _reset_password(self, question: str, answer: str):
+        while True:
+            if str(input(txt.SECURITY_KEY_TEXT + question.replace("\n", "") + '?: ')).lower() == \
+                    str(answer).replace("\n", "").lower():
+                self._clear_txt()
+                break
+
+            else:
+                print('[INFO] Access denied!')
 
     @staticmethod
     def _check_data(data: str, data_len: int):
@@ -65,3 +97,9 @@ class Create(Connect):
         else:
             print('[INFO] Data is too short or unavailable value!')
             return False
+
+    @staticmethod
+    def _clear_txt():
+        with open('../data/user_data.txt', 'w') as file:
+            file.write('')
+        Create()
