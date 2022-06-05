@@ -9,6 +9,10 @@ def strip_json(value: str):
     return value.lstrip("('").rstrip("',)").strip().replace('"', '').replace(',', '').split()
 
 
+def strip_sym(value: str):
+    return value.replace("'", '').lstrip('{').rstrip('}')
+
+
 def plus_json(message):
     data = find.find_matches_where_two(data=int(message.from_user.id), find_column_one='key', find_column_two='value',
                                        table='json', where_column='user_id')

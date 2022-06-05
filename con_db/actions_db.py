@@ -72,7 +72,7 @@ class AddUser(Connect):
         with self.connection.cursor() as cursor:
             cursor.execute(
                 f"""INSERT INTO {table} ({first_column}, {second_column}, {third_column}) VALUES ({first_value}, 
-{second_value}, {third_value});"""
+{second_value}, '{third_value}');"""
             )
 
         self._close_connection()

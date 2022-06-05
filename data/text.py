@@ -45,10 +45,10 @@ YOUTUBE_C = 'https://www.youtube.com/'
 YOUTUBE_CN = 'http://www.youtube.com/'
 YOUTUBE_CM = 'https://m.youtube.com/'
 YOUTUBE_CMN = 'http://m.youtube.com/'
-YOUTUBE_BEC = 'https://yotu.be/'
+YOUTUBE_BEC = 'https://youtu.be/'
 YOUTUBE_BECN = 'http://youtu.be/'
-YOUTUBE_BEM = 'https://m.youtu.be/'
-YOUTUBE_BEMN = 'http://m.youtu.be/'
+YOUTUBE_BEMC = 'https://m.youtu.be/'
+YOUTUBE_BEMCN = 'http://m.youtu.be/'
 VK_CM = 'https://m.vk.com/'
 VK_CMN = 'http://m.vk.com/'
 VK_C = 'https://vk.com/'
@@ -60,9 +60,9 @@ CITY_TEXT = '🏞Отлично, теперь введите улицу (При�
 STREET_TEXT = '🏰Отлично, теперь введите дом (Пример ввода дома под номером 69: 69):'
 HOME_TEXT = '🚪Отлично, теперь введите квартиру (Пример ввода квартиры под номером 3: 3. Если квартиры нет, то ставьте' \
             ' прочерк "-"):'
-DROP_TABLES_TEXT = '[INFO] Do you want to remove all your data and tables from a PostgreSQL database? If you agree ' \
+DROP_TABLES_TEXT = "[INFO] Do you want to remove all your data and tables from a PostgreSQL's database? If you agree " \
                    'to the deletion, write: "I fully agree to the deletion of all my tables and the data within ' \
-                   'them" If you do not want to delete all this data, then you can simply press <Enter>:'
+                   'them" If you do not want to delete\nall this data, then you can simply press <Enter>:'
 PASSWORD_TEXT = '[INFO] Create a password that will be required for global changes in the database structure ' \
                 '(Password must be more than 3 characters): '
 QUESTION_TEXT = '[INFO] Now come up with a key question (The question must contain more than 4 characters): '

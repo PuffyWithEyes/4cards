@@ -1,4 +1,4 @@
-# Script for python version 3.9
+# Script for python version 3.9 and for Debian Linux
 from aiogram import Bot, Dispatcher, executor, types
 from bot.config import TOKEN
 from aiogram.dispatcher.filters import Text
@@ -8,7 +8,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from con_db.actions_db import FindUser, AddUser, DeleteInfo
 import states
 import data.text as txt
-from instruments import strip_all, plus_json
+from instruments import strip_all, plus_json, strip_sym
 from con_db.ClearMessages import ClearMessages
 import json
 from con_db.Create import Create
@@ -148,6 +148,11 @@ async def ask_info_vk(message: types.Message, state: FSMContext):
         await states.NoVK.n.set()
         await message.answer(txt.DOC_TEXT, reply_markup=nav.o_cancel_menu)
 
+    elif y == '❌Отменить действие':
+        await state.finish()
+        delete.delete_where(data=int(message.from_user.id), table='json', column='user_id')
+        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
+
     else:
         await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
 
@@ -162,7 +167,8 @@ async def add_docs_vk(message: types.Message, state: FSMContext):
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.main_menu)
 
     elif 22 < len(n) < 256 and (n[0:24] == txt.YOUTUBE_C or n[0:23] == txt.YOUTUBE_CN or n[0:22] == txt.YOUTUBE_CM or
-                                n[0:21] == txt.YOUTUBE_CMN) and n.find("'") < 0:
+                                n[0:21] == txt.YOUTUBE_CMN or n[0:17] == txt.YOUTUBE_BEC or n[0:16] == txt.YOUTUBE_BECN
+                                or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN) and n.find("'") < 0:
         await state.finish()
         data = strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='message',
                                                             table='messages', where_column='user_id')))
@@ -213,6 +219,7 @@ async def add_info_tg(message: types.Message, state: FSMContext):
     y = message.text
     if y == '👍Да':
         await state.finish()
+        await states.DoReport.r.set()
         delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
         await message.answer(txt.YES_TEXT, reply_markup=nav.report_menu)
 
@@ -220,6 +227,11 @@ async def add_info_tg(message: types.Message, state: FSMContext):
         await state.finish()
         await states.NoTG.n.set()
         await message.answer(txt.DOC_TEXT, reply_markup=nav.o_cancel_menu)
+
+    elif y == '❌Отменить действие':
+        await state.finish()
+        delete.delete_where(data=int(message.from_user.id), table='json', column='user_id')
+        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
 
     else:
         await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
@@ -235,7 +247,8 @@ async def add_docs_tg(message: types.Message, state: FSMContext):
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.main_menu)
 
     elif 22 < len(n) < 256 and (n[0:24] == txt.YOUTUBE_C or n[0:23] == txt.YOUTUBE_CN or n[0:22] == txt.YOUTUBE_CM or
-                                n[0:21] == txt.YOUTUBE_CMN) and n.find("'") < 0:
+                                n[0:21] == txt.YOUTUBE_CMN or n[0:17] == txt.YOUTUBE_BEC or n[0:16] == txt.YOUTUBE_BECN
+                                or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN) and n.find("'") < 0:
         await state.finish()
         data = strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='message',
                                                             table='messages', where_column='user_id')))
@@ -286,6 +299,7 @@ async def add_info_card(message: types.Message, state: FSMContext):
     y = message.text
     if y == '👍Да':
         await state.finish()
+        await states.DoReport.r.set()
         delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
         await message.answer(txt.YES_TEXT, reply_markup=nav.report_menu)
 
@@ -293,6 +307,11 @@ async def add_info_card(message: types.Message, state: FSMContext):
         await state.finish()
         await states.NoCard.n.set()
         await message.answer(txt.DOC_TEXT, reply_markup=nav.o_cancel_menu)
+
+    elif y == '❌Отменить действие':
+        await state.finish()
+        delete.delete_where(data=int(message.from_user.id), table='json', column='user_id')
+        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
 
     else:
         await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
@@ -308,7 +327,8 @@ async def add_docs_card(message: types.Message, state: FSMContext):
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.main_menu)
 
     elif 22 < len(n) < 256 and (n[0:24] == txt.YOUTUBE_C or n[0:23] == txt.YOUTUBE_CN or n[0:22] == txt.YOUTUBE_CM or
-                                n[0:21] == txt.YOUTUBE_CMN) and n.find("'") < 0:
+                                n[0:21] == txt.YOUTUBE_CMN or n[0:17] == txt.YOUTUBE_BEC or n[0:16] == txt.YOUTUBE_BECN
+                                or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN) and n.find("'") < 0:
         await state.finish()
         data = strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='message',
                                                             table='messages', where_column='user_id')))
@@ -359,6 +379,7 @@ async def add_info_telephone(message: types.Message, state: FSMContext):
     y = message.text
     if y == '👍Да':
         await state.finish()
+        await states.DoReport.r.set()
         delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
         await message.answer(txt.YES_TEXT, reply_markup=nav.report_menu)
 
@@ -366,6 +387,11 @@ async def add_info_telephone(message: types.Message, state: FSMContext):
         await state.finish()
         await states.NoTelephone.n.set()
         await message.answer(txt.DOC_TEXT, reply_markup=nav.o_cancel_menu)
+
+    elif y == '❌Отменить действие':
+        await state.finish()
+        delete.delete_where(data=int(message.from_user.id), table='json', column='user_id')
+        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
 
     else:
         await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
@@ -381,7 +407,8 @@ async def add_docs_telephone(message: types.Message, state: FSMContext):
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.main_menu)
 
     elif 22 < len(n) < 256 and (n[0:24] == txt.YOUTUBE_C or n[0:23] == txt.YOUTUBE_CN or n[0:22] == txt.YOUTUBE_CM or
-                                n[0:21] == txt.YOUTUBE_CMN) and n.find("'") < 0:
+                                n[0:21] == txt.YOUTUBE_CMN or n[0:17] == txt.YOUTUBE_BEC or n[0:16] == txt.YOUTUBE_BECN
+                                or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN) and n.find("'") < 0:
         await state.finish()
         data = strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='message',
                                                             table='messages', where_column='user_id')))
@@ -431,7 +458,8 @@ async def add_docs_card(message: types.Message, state: FSMContext):
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.main_menu)
 
     elif 22 < len(d) < 256 and (d[0:24] == txt.YOUTUBE_C or d[0:23] == txt.YOUTUBE_CN or d[0:22] == txt.YOUTUBE_CM or
-                                d[0:21] == txt.YOUTUBE_CMN) and d.find("'") < 0:
+                                d[0:21] == txt.YOUTUBE_CMN or d[0:17] == txt.YOUTUBE_BEC or d[0:16] == txt.YOUTUBE_BECN
+                                or d[0:19] == txt.YOUTUBE_BEMC or d[0:18] == txt.YOUTUBE_BEMCN) and d.find("'") < 0:
         await state.finish()
         data = strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='message',
                                                             table='messages', where_column='user_id')))
@@ -460,7 +488,7 @@ async def json_country(message: types.Message, state: FSMContext):
     elif len(a) < 65 and a.find("'") < 0:
         await state.finish()
         add.add_three(first_value=int(message.from_user.id), second_value=("'" + strip_all(a) + "'"),
-                      third_value="'country'", first_column='user_id', second_column='value', third_column='key',
+                      third_value="country", first_column='user_id', second_column='value', third_column='key',
                       table='json')
         await states.City.c.set()
         await message.answer(txt.COUNTRY_TEXT, reply_markup=nav.o_cancel_menu)
@@ -481,7 +509,7 @@ async def json_city(message: types.Message, state: FSMContext):
     elif len(c) < 65:
         await state.finish()
         add.add_three(first_value=int(message.from_user.id), second_value=("'" + strip_all(c) + "'"),
-                      third_value="'city'", first_column='user_id', second_column='value', third_column='key',
+                      third_value="city", first_column='user_id', second_column='value', third_column='key',
                       table='json')
         await states.Street.s.set()
         await message.reply(txt.CITY_TEXT)
@@ -502,7 +530,7 @@ async def json_street(message: types.Message, state: FSMContext):
     elif len(s) < 129 and s.find("'") < 0:
         await state.finish()
         add.add_three(first_value=int(message.from_user.id), second_value=("'" + strip_all(s) + "'"),
-                      third_value="'street'", first_column='user_id', second_column='value', third_column='key',
+                      third_value="street", first_column='user_id', second_column='value', third_column='key',
                       table='json')
         await states.Home.h.set()
         await message.reply(txt.STREET_TEXT)
@@ -523,7 +551,7 @@ async def json_home(message: types.Message, state: FSMContext):
     elif len(h) < 129 and h.find("'") < 0:
         await state.finish()
         add.add_three(first_value=int(message.from_user.id), second_value=("'" + strip_all(h) + "'"),
-                      third_value="'home'", first_column='user_id', second_column='value', third_column='key',
+                      third_value="home", first_column='user_id', second_column='value', third_column='key',
                       table='json')
         await states.Apartments.a.set()
         await message.reply(txt.HOME_TEXT)
@@ -541,16 +569,17 @@ async def json_apartments(message: types.Message, state: FSMContext):
         delete.delete_where(data=int(message.from_user.id), table='json', column='user_id')
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
 
-    elif len(a) < 129 and a.find("'") < 0:
+    elif (len(a) < 129 and a.find("'") < 0 and a.isnumeric()) or (a == '—' or a == '–' or a == '−' or a == '-'):
         await state.finish()
         if a == ('-' or '–' or '—'):
-            add.add_three(first_value=int(message.from_user.id), second_value=0, third_value="'apartments'",
+            add.add_three(first_value=int(message.from_user.id), second_value=0, third_value="apartments",
                           first_column='user_id', second_column='value', third_column='key', table='json')
         else:
-            add.add_three(first_value=int(message.from_user.id), second_value=int(a), third_value="'apartments'",
+            add.add_three(first_value=int(message.from_user.id), second_value=int(a), third_value="apartments",
                           first_column='user_id', second_column='value', third_column='key', table='json')
-        matches = connect.find_matches_where_one(data=("'" + json.dumps(plus_json(message)) + "'"), find_column='address',
-                                                 table='cards_true', where_column='address')  # Ругается на ключевые символы
+            print(json.dumps(plus_json(message)))
+
+        for k, v in json.dumps(plus_json())
 
         if matches[0]:
             delete.delete_where(data=int(message.from_user.id), table='json', column='user_id')
@@ -570,6 +599,7 @@ async def add_info_address(message: types.Message, state: FSMContext):
     y = message.text
     if y == '👍Да':
         await state.finish()
+        await states.DoReport.r.set()
         delete.delete_where(data=int(message.from_user.id), table='json', column='user_id')
         await message.answer(txt.YES_TEXT, reply_markup=nav.report_menu)
 
@@ -577,6 +607,11 @@ async def add_info_address(message: types.Message, state: FSMContext):
         await state.finish()
         await states.NoTelephone.n.set()
         await message.answer(txt.DOC_TEXT, reply_markup=nav.o_cancel_menu)
+
+    elif y == '❌Отменить действие':
+        await state.finish()
+        delete.delete_where(data=int(message.from_user.id), table='json', column='user_id')
+        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
 
     else:
         await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
@@ -592,7 +627,8 @@ async def add_docs_address(message: types.Message, state: FSMContext):
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.main_menu)
 
     elif 22 < len(n) < 256 and (n[0:24] == txt.YOUTUBE_C or n[0:23] == txt.YOUTUBE_CN or n[0:22] == txt.YOUTUBE_CM or
-                                n[0:21] == txt.YOUTUBE_CMN) and n.find("'") < 0:
+                                n[0:21] == txt.YOUTUBE_CMN or n[0:17] == txt.YOUTUBE_BEC or n[0:16] == txt.YOUTUBE_BECN
+                                or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN) and n.find("'") < 0:
         await state.finish()
         add.add_two(first_value=("'" + n + "'"), second_value=("'" + plus_json(message) + "'"), first_column='docers',
                     second_column='address', table='cards_report')
