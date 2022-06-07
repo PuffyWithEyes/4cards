@@ -66,25 +66,9 @@ class DocsCard(StatesGroup):
     d = State()
 
 
-class City(StatesGroup):
-    c = State()
-
-
-class Street(StatesGroup):
-    s = State()
-
-
-class Home(StatesGroup):
-    h = State()
-
-
-class Apartments(StatesGroup):
-    a = State()
-
-
-class YesNoJson(StatesGroup):
+class YesNoDict(StatesGroup):
     y = State()
 
 
-class NoJson(StatesGroup):
+class NoDict(StatesGroup):
     n = State()

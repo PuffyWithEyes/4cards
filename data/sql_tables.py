@@ -71,8 +71,7 @@ MESSAGES = """
 CREATE TABLE IF NOT EXISTS public.messages
 (
     user_id integer NOT NULL,
-    message character(255) COLLATE pg_catalog."default",
-    json jsonb
+    message character(255) COLLATE pg_catalog."default"
 )
 
 TABLESPACE pg_default;
@@ -81,12 +80,12 @@ ALTER TABLE IF EXISTS public.messages
     OWNER to postgres;
 """
 
-JSON = """
--- Table: public.json
+ADDRESS_DICT = """
+-- Table: public.address_dict
 
--- DROP TABLE IF EXISTS public.json;
+-- DROP TABLE IF EXISTS public.address_dict;
 
-CREATE TABLE IF NOT EXISTS public.json
+CREATE TABLE IF NOT EXISTS public.address_dict
 (
     user_id integer NOT NULL,
     value character(128) COLLATE pg_catalog."default",
@@ -95,7 +94,7 @@ CREATE TABLE IF NOT EXISTS public.json
 
 TABLESPACE pg_default;
 
-ALTER TABLE IF EXISTS public.json
+ALTER TABLE IF EXISTS public.address_dict
     OWNER to postgres;
 """
 
@@ -111,8 +110,8 @@ DROP_CARDS_TRUE = """
 DROP TABLE cards_true;
 """
 
-DROP_JSON = """
-DROP TABLE json;
+DROP_ADDRESS_DICT = """
+DROP TABLE address_dict;
 """
 
 DROP_MESSAGES = """

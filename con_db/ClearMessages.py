@@ -14,7 +14,7 @@ class ClearMessages(Connect):
                 """DELETE FROM messages;"""
             )
             cursor.execute(
-                """DELETE FROM json;"""
+                """DELETE FROM address_dict;"""
             )
 
         self._close_connection()

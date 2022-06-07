@@ -8,9 +8,8 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from con_db.actions_db import FindUser, AddUser, DeleteInfo
 import states
 import data.text as txt
-from instruments import strip_all, plus_json, strip_sym
+from instruments import strip_all, plus_dict
 from con_db.ClearMessages import ClearMessages
-import json
 from con_db.Create import Create
 
 
@@ -83,8 +82,7 @@ async def do_report(message: types.Message, state: FSMContext):
     elif r == '🏠Проверить по адресу':
         await state.finish()
         await states.Address.a.set()
-        await message.reply(txt.ADDRESS_TEXT_P1)
-        await message.reply(txt.ADDRESS_TEXT_P2, reply_markup=nav.cancel_menu)
+        await message.reply(txt.ADDRESS_TEXT, reply_markup=nav.cancel_menu)
 
     elif r == '🧾У меня есть ID мошенника из базы данных':
         await state.finish()
@@ -150,7 +148,7 @@ async def ask_info_vk(message: types.Message, state: FSMContext):
 
     elif y == '❌Отменить действие':
         await state.finish()
-        delete.delete_where(data=int(message.from_user.id), table='json', column='user_id')
+        delete.delete_where(data=int(message.from_user.id), table='address_dict', column='user_id')
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
 
     else:
@@ -230,7 +228,7 @@ async def add_info_tg(message: types.Message, state: FSMContext):
 
     elif y == '❌Отменить действие':
         await state.finish()
-        delete.delete_where(data=int(message.from_user.id), table='json', column='user_id')
+        delete.delete_where(data=int(message.from_user.id), table='address_dict', column='user_id')
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
 
     else:
@@ -310,7 +308,7 @@ async def add_info_card(message: types.Message, state: FSMContext):
 
     elif y == '❌Отменить действие':
         await state.finish()
-        delete.delete_where(data=int(message.from_user.id), table='json', column='user_id')
+        delete.delete_where(data=int(message.from_user.id), table='address_dict', column='user_id')
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
 
     else:
@@ -390,7 +388,7 @@ async def add_info_telephone(message: types.Message, state: FSMContext):
 
     elif y == '❌Отменить действие':
         await state.finish()
-        delete.delete_where(data=int(message.from_user.id), table='json', column='user_id')
+        delete.delete_where(data=int(message.from_user.id), table='address_dict', column='user_id')
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
 
     else:
@@ -473,10 +471,10 @@ async def add_docs_card(message: types.Message, state: FSMContext):
 
 
 @dp.message_handler(state=states.Address.a)
-async def json_country(message: types.Message, state: FSMContext):
+async def check_address(message: types.Message, state: FSMContext):
     """ This function ask user swindler's house """
     a = message.text
-    delete.delete_where(data=int(message.from_user.id), table='json', column='user_id')
+    delete.delete_where(data=int(message.from_user.id), table='address_dict', column='user_id')
     if a == '❌Отменить действие':
         await state.finish()
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
@@ -485,122 +483,33 @@ async def json_country(message: types.Message, state: FSMContext):
         await state.finish()
         await message.answer(txt.BACK_TEXT, reply_markup=nav.selections_menu)
 
-    elif len(a) < 65 and a.find("'") < 0:
-        await state.finish()
-        add.add_three(first_value=int(message.from_user.id), second_value=("'" + strip_all(a) + "'"),
-                      third_value="country", first_column='user_id', second_column='value', third_column='key',
-                      table='json')
-        await states.City.c.set()
-        await message.answer(txt.COUNTRY_TEXT, reply_markup=nav.o_cancel_menu)
-
-    else:
-        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
-
-
-@dp.message_handler(state=states.City.c)
-async def json_city(message: types.Message, state: FSMContext):
-    """ This function ask user swindler's house """
-    c = message.text
-    if c == '❌Отменить действие':
-        await state.finish()
-        delete.delete_where(data=int(message.from_user.id), table='json', column='user_id')
-        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
-
-    elif len(c) < 65:
-        await state.finish()
-        add.add_three(first_value=int(message.from_user.id), second_value=("'" + strip_all(c) + "'"),
-                      third_value="city", first_column='user_id', second_column='value', third_column='key',
-                      table='json')
-        await states.Street.s.set()
-        await message.reply(txt.CITY_TEXT)
-
-    else:
-        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
-
-
-@dp.message_handler(state=states.Street.s)
-async def json_street(message: types.Message, state: FSMContext):
-    """ This function ask user swindler's house """
-    s = message.text
-    if s == '❌Отменить действие':
-        await state.finish()
-        delete.delete_where(data=int(message.from_user.id), table='json', column='user_id')
-        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
-
-    elif len(s) < 129 and s.find("'") < 0:
-        await state.finish()
-        add.add_three(first_value=int(message.from_user.id), second_value=("'" + strip_all(s) + "'"),
-                      third_value="street", first_column='user_id', second_column='value', third_column='key',
-                      table='json')
-        await states.Home.h.set()
-        await message.reply(txt.STREET_TEXT)
-
-    else:
-        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
-
-
-@dp.message_handler(state=states.Home.h)
-async def json_home(message: types.Message, state: FSMContext):
-    """ This function ask user swindler's house """
-    h = message.text
-    if h == '❌Отменить действие':
-        await state.finish()
-        delete.delete_where(data=int(message.from_user.id), table='json', column='user_id')
-        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
-
-    elif len(h) < 129 and h.find("'") < 0:
-        await state.finish()
-        add.add_three(first_value=int(message.from_user.id), second_value=("'" + strip_all(h) + "'"),
-                      third_value="home", first_column='user_id', second_column='value', third_column='key',
-                      table='json')
-        await states.Apartments.a.set()
-        await message.reply(txt.HOME_TEXT)
-
-    else:
-        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
-
-
-@dp.message_handler(state=states.Apartments.a)
-async def json_apartments(message: types.Message, state: FSMContext):
-    """ This function ask user swindler's apartment """
-    a = message.text
-    if a == '❌Отменить действие':
-        await state.finish()
-        delete.delete_where(data=int(message.from_user.id), table='json', column='user_id')
-        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
-
-    elif (len(a) < 129 and a.find("'") < 0 and a.isnumeric()) or (a == '—' or a == '–' or a == '−' or a == '-'):
-        await state.finish()
-        if a == ('-' or '–' or '—'):
-            add.add_three(first_value=int(message.from_user.id), second_value=0, third_value="apartments",
-                          first_column='user_id', second_column='value', third_column='key', table='json')
-        else:
-            add.add_three(first_value=int(message.from_user.id), second_value=int(a), third_value="apartments",
-                          first_column='user_id', second_column='value', third_column='key', table='json')
-            print(json.dumps(plus_json(message)))
-
-        for k, v in json.dumps(plus_json())
-
+    elif len(a) < 65 and a.find("'") < 0 and a.count(',') == 4:
+        matches = connect.find_matches(mean=("'" + a + "'"), column='address')
         if matches[0]:
-            delete.delete_where(data=int(message.from_user.id), table='json', column='user_id')
-            await message.answer(f'{txt.USER_FIND_TEXT_P1} {strip_all(str(matches[1]))}'
-                                 f'{txt.USER_FIND_TEXT_P2}', reply_markup=nav.selections_menu)
+            await state.finish()
+            await states.YesNoTelephone.y.set()
+            await message.reply(f'{txt.USER_FIND_TEXT_P1} {strip_all(str(matches[1]))}'
+                                f'{txt.USER_FIND_TEXT_P2}', reply_markup=nav.selections_menu)
         else:
-            await states.YesNoJson.y.set()
-            await message.answer(txt.USER_NFIND_TEXT, reply_markup=nav.yesno_menu)
+            await state.finish()
+            delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
+            add.add_two(first_value=int(message.from_user.id), second_value=("'" + a + "'"), first_column='user_id',
+                        second_column='message', table='messages')
+            await states.YesNoTelephone.y.set()
+            await message.reply(txt.USER_NFIND_TEXT, reply_markup=nav.yesno_menu)
 
     else:
         await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
 
 
-@dp.message_handler(state=states.YesNoJson.y)
+@dp.message_handler(state=states.YesNoDict.y)
 async def add_info_address(message: types.Message, state: FSMContext):
     """ Function for ask user about info """
     y = message.text
     if y == '👍Да':
         await state.finish()
         await states.DoReport.r.set()
-        delete.delete_where(data=int(message.from_user.id), table='json', column='user_id')
+        delete.delete_where(data=int(message.from_user.id), table='address_dict', column='user_id')
         await message.answer(txt.YES_TEXT, reply_markup=nav.report_menu)
 
     elif y == '👎Нет':
@@ -610,33 +519,50 @@ async def add_info_address(message: types.Message, state: FSMContext):
 
     elif y == '❌Отменить действие':
         await state.finish()
-        delete.delete_where(data=int(message.from_user.id), table='json', column='user_id')
+        delete.delete_where(data=int(message.from_user.id), table='address_dict', column='user_id')
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
 
     else:
         await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
 
 
-@dp.message_handler(state=states.NoJson.n)
+@dp.message_handler(state=states.NoDict.n)
 async def add_docs_address(message: types.Message, state: FSMContext):
     """ This function add proofs in database """
     n = message.text
     if n == '❌Отменить действие':
         await state.finish()
-        delete.delete_where(data=int(message.from_user.id), table='json', column='user_id')
+        delete.delete_where(data=int(message.from_user.id), table='address_dict', column='user_id')
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.main_menu)
 
     elif 22 < len(n) < 256 and (n[0:24] == txt.YOUTUBE_C or n[0:23] == txt.YOUTUBE_CN or n[0:22] == txt.YOUTUBE_CM or
                                 n[0:21] == txt.YOUTUBE_CMN or n[0:17] == txt.YOUTUBE_BEC or n[0:16] == txt.YOUTUBE_BECN
                                 or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN) and n.find("'") < 0:
         await state.finish()
-        add.add_two(first_value=("'" + n + "'"), second_value=("'" + plus_json(message) + "'"), first_column='docers',
+        add.add_two(first_value=("'" + n + "'"), second_value=("'" + plus_dict(message) + "'"), first_column='docers',
                     second_column='address', table='cards_report')
-        delete.delete_where(data=int(message.from_user.id), table='json', column='user_id')
+        delete.delete_where(data=int(message.from_user.id), table='address_dict', column='user_id')
         await message.answer(txt.DOCS_TEXT, reply_markup=nav.main_menu)
 
     else:
         await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+
+
+@dp.message_handler(commands='ahelp')
+async def start(message: types.Message):
+    """ Function of admin help """
+    if connect.find_matches_where_one(data=int(message.from_user.id), find_column='user_id', table='admin_panel',
+                                      where_column='user_id'):
+        await message.answer(txt.ADMIN_HELP_TEXT, reply_markup=nav.main_menu)
+    else:
+        await message.answer(txt.ACCESS_TEXT, reply_markup=nav.main_menu)
+
+
+@dp.message_handler(commands='apanel')
+async def start(message: types.Message):
+    """ Function of admin registration """
+    connect.find_matches_where_two(data=int(message.from_user.id), find_column_one='user_id',
+                                   find_column_two='user_password', table='admin_panel', where_column='user_id')
 
 
 @dp.message_handler(Text(equals='❌Отменить действие'))
