@@ -8,9 +8,11 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from con_db.actions_db import FindUser, AddUser, DeleteInfo, UpdateInfo
 import states
 import data.text as txt
-from instruments import strip_all, plus_dict
+from instruments import strip_all, strip_list
 from con_db.ClearMessages import ClearMessages
 from con_db.Create import Create
+import asyncio
+from con_db.admins import admins
 
 
 # Global settings for the bot
@@ -466,77 +468,77 @@ async def add_docs_card(message: types.Message, state: FSMContext):
         await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
 
 
-@dp.message_handler(state=states.Address.a)
-async def check_address(message: types.Message, state: FSMContext):
-    """ This function ask user swindler's house """
-    a = message.text
-    if a == '❌Отменить действие':
-        await state.finish()
-        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
-
-    elif a == '🔄Вернуться назад':
-        await state.finish()
-        await message.answer(txt.BACK_TEXT, reply_markup=nav.selections_menu)
-
-    elif len(a) < 65 and a.find("'") < 0 and a.count(',') == 4:
-        matches = connect.find_matches(mean=a, column='address')
-        if matches[0]:
-            await state.finish()
-            await states.YesNoDict.y.set()
-            await message.reply(f'{txt.USER_FIND_TEXT_P1} {strip_all(str(matches[1]))}'
-                                f'{txt.USER_FIND_TEXT_P2}', reply_markup=nav.selections_menu)
-        else:
-            await state.finish()
-            delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
-            add.add_two(first_value=int(message.from_user.id), second_value=a, first_column='user_id',
-                        second_column='message', table='messages')
-            await states.YesNoDict.y.set()
-            await message.reply(txt.USER_NFIND_TEXT, reply_markup=nav.yesno_menu)
-
-    else:
-        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
-
-
-@dp.message_handler(state=states.YesNoDict.y)
-async def add_info_address(message: types.Message, state: FSMContext):
-    """ Function for ask user about info """
-    y = message.text
-    if y == '👍Да':
-        await state.finish()
-        await states.DoReport.r.set()
-        await message.answer(txt.YES_TEXT, reply_markup=nav.report_menu)
-
-    elif y == '👎Нет':
-        await state.finish()
-        await states.NoTelephone.n.set()
-        await message.answer(txt.DOC_TEXT, reply_markup=nav.o_cancel_menu)
-
-    elif y == '❌Отменить действие':
-        await state.finish()
-        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
-
-    else:
-        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
-
-
-@dp.message_handler(state=states.NoDict.n)
-async def add_docs_address(message: types.Message, state: FSMContext):
-    """ This function add proofs in database """
-    n = message.text
-    if n == '❌Отменить действие':
-        await state.finish()
-        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.main_menu)
-
-    elif 22 < len(n) < 256 and (n[0:24] == txt.YOUTUBE_C or n[0:23] == txt.YOUTUBE_CN or n[0:22] == txt.YOUTUBE_CM or
-                                n[0:21] == txt.YOUTUBE_CMN or n[0:17] == txt.YOUTUBE_BEC or n[0:16] == txt.YOUTUBE_BECN
-                                or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN) and n.find("'") < 0:
-        await state.finish()
-        add.add_two(first_value=n, second_value=plus_dict(message), first_column='docers',
-                    second_column='address', table='cards_report')
-        await message.answer(txt.DOCS_TEXT, reply_markup=nav.main_menu)
-
-    else:
-        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+# @dp.message_handler(state=states.Address.a)
+# async def check_address(message: types.Message, state: FSMContext):
+#     """ This function ask user swindler's house """
+#     a = message.text
+#     if a == '❌Отменить действие':
+#         await state.finish()
+#         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
+#
+#     elif a == '🔄Вернуться назад':
+#         await state.finish()
+#         await message.answer(txt.BACK_TEXT, reply_markup=nav.selections_menu)
+#
+#     elif len(a) < 65 and a.find("'") < 0 and a.count(',') == 4:
+#         matches = connect.find_matches(mean=a, column='address')
+#         if matches[0]:
+#             await state.finish()
+#             await states.YesNoDict.y.set()
+#             await message.reply(f'{txt.USER_FIND_TEXT_P1} {strip_all(str(matches[1]))}'
+#                                 f'{txt.USER_FIND_TEXT_P2}', reply_markup=nav.selections_menu)
+#         else:
+#             await state.finish()
+#             delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
+#             add.add_two(first_value=int(message.from_user.id), second_value=a, first_column='user_id',
+#                         second_column='message', table='messages')
+#             await states.YesNoDict.y.set()
+#             await message.reply(txt.USER_NFIND_TEXT, reply_markup=nav.yesno_menu)
+#
+#     else:
+#         await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+#
+#
+# @dp.message_handler(state=states.YesNoDict.y)
+# async def add_info_address(message: types.Message, state: FSMContext):
+#     """ Function for ask user about info """
+#     y = message.text
+#     if y == '👍Да':
+#         await state.finish()
+#         await states.DoReport.r.set()
+#         await message.answer(txt.YES_TEXT, reply_markup=nav.report_menu)
+#
+#     elif y == '👎Нет':
+#         await state.finish()
+#         await states.NoTelephone.n.set()
+#         await message.answer(txt.DOC_TEXT, reply_markup=nav.o_cancel_menu)
+#
+#     elif y == '❌Отменить действие':
+#         await state.finish()
+#         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
+#
+#     else:
+#         await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+#
+#
+# @dp.message_handler(state=states.NoDict.n)
+# async def add_docs_address(message: types.Message, state: FSMContext):
+#     """ This function add proofs in database """
+#     n = message.text
+#     if n == '❌Отменить действие':
+#         await state.finish()
+#         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.main_menu)
+#
+#     elif 22 < len(n) < 256 and (n[0:24] == txt.YOUTUBE_C or n[0:23] == txt.YOUTUBE_CN or n[0:22] == txt.YOUTUBE_CM or
+#                                 n[0:21] == txt.YOUTUBE_CMN or n[0:17] == txt.YOUTUBE_BEC or n[0:16] == txt.YOUTUBE_BECN
+#                                 or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN) and n.find("'") < 0:
+#         await state.finish()
+#         add.add_two(first_value=n, second_value=plus_dict(message), first_column='docers',
+#                     second_column='address', table='cards_report')
+#         await message.answer(txt.DOCS_TEXT, reply_markup=nav.main_menu)
+#
+#     else:
+#         await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
 
 
 @dp.message_handler(commands='ahelp')
@@ -553,13 +555,14 @@ async def ahelp(message: types.Message):
 async def apanel(message: types.Message, state: FSMContext):
     """ Function of admin registration """
     await state.reset_state()
-    access = connect.find_matches_where_two(data=int(message.from_user.id), find_column_one='user_id',
-                                            find_column_two='user_password', table='admin_panel',
-                                            where_column='user_id')
-    if len(access) == 2:
+    access = len(strip_list(str(connect.find_matches_where_two(data=int(message.from_user.id),
+                                                               find_column_one='user_id',
+                                                               find_column_two='user_password', table='admin_panel',
+                                                               where_column='user_id'))))
+    if access == 2:
         await states.EnterAdmin.e.set()
         await message.answer(txt.APASSWORD_TEXT, reply_markup=nav.o_cancel_menu)
-    elif len(access) == 1:
+    elif access == 1:
         await states.CreateApassword.c.set()
         await message.answer(txt.CREATE_PASSWORD_TEXT, reply_markup=nav.cancel_menu)
     else:
@@ -573,8 +576,8 @@ async def create_apassword(message: types.Message, state: FSMContext):
     if c == '❌Отменить действие':
         await state.finish()
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.main_menu)
-    elif 4 <= len(c) < 33 and c.find("'") < 0:
-        update.update_where(data_what=c, data_where=message.from_user.id, table_what='user_password',
+    elif 4 <= len(c) < 33 and c.find("'") < 0 and c.find(',') < 0:
+        update.update_where(data_what=c, data_where=int(message.from_user.id), table_what='user_password',
                             table_where='user_id', table='admin_panel')
         await state.finish()
         await states.Apanel.a.set()
@@ -590,17 +593,28 @@ async def apassword(message: types.Message, state: FSMContext):
         await state.finish()
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.main_menu)
     elif 4 <= len(e) < 33 and e.find("'") < 0:
-        # connect.find_matches_where_one(data=)
-        await state.finish()
-        await states.Apanel.a.set()
-        await message.answer(txt.ACCEPT_PASSWORD_TEXT)
+        login = strip_list(str(connect.find_matches_where_two(data=message.from_user.id, find_column_one='user_id',
+                                                              find_column_two='user_password', table='admin_panel',
+                                                              where_column='user_id')))
+        if int(login[0]) == int(message.from_user.id) and str(login[1]) == str(e):
+            await state.finish()
+            await states.Apanel.a.set()
+            social_credit = int(connect.find_matches_where_one(data=int(message.from_user.id),
+                                                               find_column='social_credit', table='admin_panel', where_column='user_id'))
+            await message.answer((txt.AENTER_TEXT_P1), social_credit, )
+        else:
+            await message.answer(txt.INCORRECT_TEXT)
     else:
         await message.answer(txt.WRONG_TEXT)
 
 
 @dp.message_handler(state=states.Apanel.a)
 async def admin(message: types.Message, state: FSMContext):
-    pass
+    await message.answer('')
+    while True:
+        await asyncio.sleep(1)
+        print(1)
+        await message.answer(str(connect.find_all(table='cards_report')))
 
 
 @dp.message_handler(Text(equals='❌Отменить действие'))

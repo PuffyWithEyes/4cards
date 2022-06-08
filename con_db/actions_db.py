@@ -38,7 +38,22 @@ class FindUser(Connect):
             cursor.execute(
                 f"""SELECT ({find_column_one}, {find_column_two}) FROM {table} WHERE {where_column}='{data}';"""
             )
-            data_db = cursor.fetchall()
+            data_db = cursor.fetchone()
+
+        self._close_connection()
+        return data_db
+
+    def find_what_one(self, where: str, table: str, flag: bool):
+        """ Find all data from some table """
+        self._connect()
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                f"""SELECT {where} FROM {table};"""
+            )
+            if flag:
+                data_db = cursor.fetchone()
+            else:
+                data_db = cursor.fetchall()
 
         self._close_connection()
         return data_db
