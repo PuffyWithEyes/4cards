@@ -1,6 +1,22 @@
 """ Texts for create tables in PostgreSQL """
 
 
+DATABASE = """
+-- Database: cards
+
+-- DROP DATABASE IF EXISTS cards;
+
+CREATE DATABASE cards
+    WITH
+    OWNER = postgres
+    ENCODING = 'UTF8'
+    LC_COLLATE = 'en_US.UTF-8'
+    LC_CTYPE = 'en_US.UTF-8'
+    TABLESPACE = pg_default
+    CONNECTION LIMIT = -1;
+"""
+
+
 ADMIN_PANEL = """
 -- Table: public.admin_panel
 
@@ -80,24 +96,6 @@ ALTER TABLE IF EXISTS public.messages
     OWNER to postgres;
 """
 
-ADDRESS_DICT = """
--- Table: public.address_dict
-
--- DROP TABLE IF EXISTS public.address_dict;
-
-CREATE TABLE IF NOT EXISTS public.address_dict
-(
-    user_id integer NOT NULL,
-    value character(128) COLLATE pg_catalog."default",
-    key character(16) COLLATE pg_catalog."default" NOT NULL
-)
-
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.address_dict
-    OWNER to postgres;
-"""
-
 DROP_ADMIN_PANEL = """
 DROP TABLE admin_panel;
 """
@@ -110,9 +108,6 @@ DROP_CARDS_TRUE = """
 DROP TABLE cards_true;
 """
 
-DROP_ADDRESS_DICT = """
-DROP TABLE address_dict;
-"""
 
 DROP_MESSAGES = """
 DROP TABLE messages;

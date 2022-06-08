@@ -7,12 +7,12 @@ class FindUser(Connect):
         self._connect()
         with self.connection.cursor() as cursor:
             cursor.execute(  # Check for matches
-                f"""SELECT {column} FROM cards_true WHERE {column}={mean};"""
+                f"""SELECT {column} FROM cards_true WHERE {column}='{mean}';"""
             )
             find = self._check_none(cursor.fetchone())
 
             cursor.execute(  # Check for matches
-                f"""SELECT id FROM cards_true WHERE {column}={mean};"""
+                f"""SELECT id FROM cards_true WHERE {column}='{mean}';"""
             )
             user_id = cursor.fetchone()
 
@@ -24,7 +24,7 @@ class FindUser(Connect):
         self._connect()
         with self.connection.cursor() as cursor:
             cursor.execute(
-                f"""SELECT {find_column} FROM {table} WHERE {where_column}={data};"""
+                f"""SELECT {find_column} FROM {table} WHERE {where_column}='{data}';"""
             )
             data_db = cursor.fetchone()
 
@@ -36,7 +36,7 @@ class FindUser(Connect):
         self._connect()
         with self.connection.cursor() as cursor:
             cursor.execute(
-                f"""SELECT ({find_column_one}, {find_column_two}) FROM {table} WHERE {where_column}={data};"""
+                f"""SELECT ({find_column_one}, {find_column_two}) FROM {table} WHERE {where_column}='{data}';"""
             )
             data_db = cursor.fetchall()
 
@@ -50,7 +50,7 @@ class AddUser(Connect):
         self._connect()
         with self.connection.cursor() as cursor:
             cursor.execute(
-                f"""INSERT INTO {table} ({column}) VALUES ({value});"""
+                f"""INSERT INTO {table} ({column}) VALUES ('{value}');"""
             )
 
         self._close_connection()
@@ -60,7 +60,7 @@ class AddUser(Connect):
         self._connect()
         with self.connection.cursor() as cursor:
             cursor.execute(
-                f"""INSERT INTO {table} ({first_column}, {second_column}) VALUES ({first_value}, {second_value});"""
+                f"""INSERT INTO {table} ({first_column}, {second_column}) VALUES ('{first_value}', '{second_value}');"""
             )
 
         self._close_connection()
@@ -71,8 +71,8 @@ class AddUser(Connect):
         self._connect()
         with self.connection.cursor() as cursor:
             cursor.execute(
-                f"""INSERT INTO {table} ({first_column}, {second_column}, {third_column}) VALUES ({first_value}, 
-{second_value}, '{third_value}');"""
+                f"""INSERT INTO {table} ({first_column}, {second_column}, {third_column}) VALUES ('{first_value}', 
+'{second_value}', '{third_value}');"""
             )
 
         self._close_connection()
@@ -83,7 +83,18 @@ class DeleteInfo(Connect):
         self._connect()
         with self.connection.cursor() as cursor:
             cursor.execute(
-                f"""DELETE FROM {table} WHERE {column}={data};"""
+                f"""DELETE FROM {table} WHERE {column}='{data}';"""
+            )
+
+        self._close_connection()
+
+
+class UpdateInfo(Connect):
+    def update_where(self, data_what, data_where, table_what: str, table_where: str, table: str):
+        self._connect()
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                f"""UPDATE {table} SET {table_what}='{data_what}' WHERE {table_where}='{data_where}';"""
             )
 
         self._close_connection()

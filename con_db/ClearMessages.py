@@ -13,9 +13,6 @@ class ClearMessages(Connect):
             cursor.execute(
                 """DELETE FROM messages;"""
             )
-            cursor.execute(
-                """DELETE FROM address_dict;"""
-            )
 
         self._close_connection()
         time.sleep(86400)

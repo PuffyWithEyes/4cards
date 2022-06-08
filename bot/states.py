@@ -72,3 +72,15 @@ class YesNoDict(StatesGroup):
 
 class NoDict(StatesGroup):
     n = State()
+
+
+class CreateApassword(StatesGroup):
+    c = State()
+
+
+class Apanel(StatesGroup):
+    a = State()
+
+
+class EnterAdmin(StatesGroup):
+    e = State()

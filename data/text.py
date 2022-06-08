@@ -67,6 +67,11 @@ ANSWER_TEXT = '[INFO] Excellent! Now write the answer to this question (It must 
 ACCEPT_DEL_TEXT = '[INFO] If you want to delete everything, then write your password! If you change your mind about ' \
                   'nulling/deleting, press <Ctrl + C>. If you want to reset your password, write: "Reset": '
 SECURITY_KEY_TEXT = '[INFO] Please answer the security question: '
-ADMIN_HELP_TEXT = '/apanel - Войти под аккаунт администратора и начать администрирование\n/q - выйти из аккаунта ' \
-                  'администратора и прекратить администрирование'
+ADMIN_HELP_TEXT = 'По всем вопросам писать главному администратору - @puffy22\n\n/apanel - Войти под аккаунт ' \
+                  'администратора и начать администрирование\n/q - выйти из аккаунта администратора и прекратить ' \
+                  'администрирование'
 ACCESS_TEXT = 'Отказано в доступе!'
+APASSWORD_TEXT = 'Введите пароль от вашего админ аккаунта:'
+CREATE_PASSWORD_TEXT = 'Создайте пароль от вашего админ аккаунта (Он должен быть не больше 32 символов и не меньше 4!):'
+ACCEPT_PASSWORD_TEXT = 'Пароль успешно записан! Запишите его! Для сброса пишите главному администратору - @puffy22'
+AENTER_TEXT = 'Вы успешно авторизовались под админский аккаунт!'

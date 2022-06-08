@@ -5,7 +5,7 @@ from aiogram.dispatcher.filters import Text
 import data.markup as nav
 from aiogram.dispatcher import FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from con_db.actions_db import FindUser, AddUser, DeleteInfo
+from con_db.actions_db import FindUser, AddUser, DeleteInfo, UpdateInfo
 import states
 import data.text as txt
 from instruments import strip_all, plus_dict
@@ -112,7 +112,7 @@ async def check_vk(message: types.Message, state: FSMContext):
         
     elif 15 < len(s) < 129 and (s[0:17] == txt.VK_CM or s[0:16] == txt.VK_CMN or s[0:15] == txt.VK_C or s[0:14] ==
                                 txt.VK_CN) and s.find("'") < 0:
-        matches = connect.find_matches(mean=("'" + s + "'"), column='share_vk')
+        matches = connect.find_matches(mean=s, column='share_vk')
 
         if matches[0]:
             await state.finish()
@@ -123,7 +123,7 @@ async def check_vk(message: types.Message, state: FSMContext):
             await state.finish()
             await states.YesNoVK.y.set()
             delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
-            add.add_two(first_value=int(message.from_user.id), second_value=("'" + s + "'"), first_column='user_id',
+            add.add_two(first_value=int(message.from_user.id), second_value=s, first_column='user_id',
                         second_column='message', table='messages')
             await message.reply(txt.USER_NFIND_TEXT, reply_markup=nav.yesno_menu)
 
@@ -136,7 +136,7 @@ async def ask_info_vk(message: types.Message, state: FSMContext):
     """ Function for ask user about info """
     y = message.text
     if y == '👍Да':
-        await state.finish()  # После этого не реагирует на кнопки кроме назад
+        await state.finish()
         await states.DoReport.r.set()
         delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
         await message.answer(txt.YES_TEXT, reply_markup=nav.report_menu)
@@ -148,7 +148,6 @@ async def ask_info_vk(message: types.Message, state: FSMContext):
 
     elif y == '❌Отменить действие':
         await state.finish()
-        delete.delete_where(data=int(message.from_user.id), table='address_dict', column='user_id')
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
 
     else:
@@ -170,7 +169,7 @@ async def add_docs_vk(message: types.Message, state: FSMContext):
         await state.finish()
         data = strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='message',
                                                             table='messages', where_column='user_id')))
-        add.add_two(first_value=("'" + n + "'"), second_value=("'" + data + "'"), first_column='docers',
+        add.add_two(first_value=n, second_value=data, first_column='docers',
                     second_column='share_vk', table='cards_report')
         delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
         await message.answer(txt.DOCS_TEXT, reply_markup=nav.main_menu)
@@ -192,7 +191,7 @@ async def check_tg(message: types.Message, state: FSMContext):
         await message.answer(txt.BACK_TEXT, reply_markup=nav.selections_menu)
 
     elif len(i) < 65 and i.find("'") < 0:
-        matches = connect.find_matches(mean=("'" + i + "'"), column='share_tg')
+        matches = connect.find_matches(mean=i, column='share_tg')
 
         if matches[0]:
             await state.finish()
@@ -202,7 +201,7 @@ async def check_tg(message: types.Message, state: FSMContext):
         else:
             await state.finish()
             delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
-            add.add_two(first_value=int(message.from_user.id), second_value=("'" + i + "'"), first_column='user_id',
+            add.add_two(first_value=int(message.from_user.id), second_value=i, first_column='user_id',
                         second_column='message', table='messages')
             await states.YesNoTG.y.set()
             await message.reply(txt.USER_NFIND_TEXT, reply_markup=nav.yesno_menu)
@@ -228,7 +227,6 @@ async def add_info_tg(message: types.Message, state: FSMContext):
 
     elif y == '❌Отменить действие':
         await state.finish()
-        delete.delete_where(data=int(message.from_user.id), table='address_dict', column='user_id')
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
 
     else:
@@ -250,7 +248,7 @@ async def add_docs_tg(message: types.Message, state: FSMContext):
         await state.finish()
         data = strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='message',
                                                             table='messages', where_column='user_id')))
-        add.add_two(first_value=("'" + n + "'"), second_value=("'" + data + "'"), first_column='docers',
+        add.add_two(first_value=n, second_value=data, first_column='docers',
                     second_column='share_tg', table='cards_report')
         delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
         await message.answer(txt.DOCS_TEXT, reply_markup=nav.main_menu)
@@ -308,7 +306,6 @@ async def add_info_card(message: types.Message, state: FSMContext):
 
     elif y == '❌Отменить действие':
         await state.finish()
-        delete.delete_where(data=int(message.from_user.id), table='address_dict', column='user_id')
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
 
     else:
@@ -330,7 +327,7 @@ async def add_docs_card(message: types.Message, state: FSMContext):
         await state.finish()
         data = strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='message',
                                                             table='messages', where_column='user_id')))
-        add.add_two(first_value=("'" + n + "'"), second_value=int(data), first_column='docers', second_column='cnumber',
+        add.add_two(first_value=n, second_value=int(data), first_column='docers', second_column='cnumber',
                     table='cards_report')
         delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
         await message.answer(txt.DOCS_TEXT, reply_markup=nav.main_menu)
@@ -352,7 +349,7 @@ async def check_telephone(message: types.Message, state: FSMContext):
         await message.answer(txt.BACK_TEXT, reply_markup=nav.selections_menu)
 
     elif len(t) < 17 and t.find("'") < 0 and t[0] == '+':
-        matches = connect.find_matches(mean=("'" + t + "'"), column='tnumber')
+        matches = connect.find_matches(mean=t, column='tnumber')
 
         if matches[0]:
             await state.finish()
@@ -362,7 +359,7 @@ async def check_telephone(message: types.Message, state: FSMContext):
         else:
             await state.finish()
             delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
-            add.add_two(first_value=int(message.from_user.id), second_value=("'" + t + "'"), first_column='user_id',
+            add.add_two(first_value=int(message.from_user.id), second_value=t, first_column='user_id',
                         second_column='message', table='messages')
             await states.YesNoTelephone.y.set()
             await message.reply(txt.USER_NFIND_TEXT, reply_markup=nav.yesno_menu)
@@ -388,7 +385,6 @@ async def add_info_telephone(message: types.Message, state: FSMContext):
 
     elif y == '❌Отменить действие':
         await state.finish()
-        delete.delete_where(data=int(message.from_user.id), table='address_dict', column='user_id')
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
 
     else:
@@ -410,7 +406,7 @@ async def add_docs_telephone(message: types.Message, state: FSMContext):
         await state.finish()
         data = strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='message',
                                                             table='messages', where_column='user_id')))
-        add.add_two(first_value=("'" + n + "'"), second_value=("'" + data + "'"), first_column='docers',
+        add.add_two(first_value=n, second_value=data, first_column='docers',
                     second_column='tnumber', table='cards_report')
         delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
         await message.answer(txt.DOCS_TEXT, reply_markup=nav.main_menu)
@@ -461,7 +457,7 @@ async def add_docs_card(message: types.Message, state: FSMContext):
         await state.finish()
         data = strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='message',
                                                             table='messages', where_column='user_id')))
-        add.add_two(first_value=("'" + d + "'"), second_value=int(data), first_column='docers',
+        add.add_two(first_value=d, second_value=int(data), first_column='docers',
                     second_column='got_id', table='cards_report')
         delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
         await message.answer(txt.DOCS_TEXT, reply_markup=nav.main_menu)
@@ -474,7 +470,6 @@ async def add_docs_card(message: types.Message, state: FSMContext):
 async def check_address(message: types.Message, state: FSMContext):
     """ This function ask user swindler's house """
     a = message.text
-    delete.delete_where(data=int(message.from_user.id), table='address_dict', column='user_id')
     if a == '❌Отменить действие':
         await state.finish()
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
@@ -484,18 +479,18 @@ async def check_address(message: types.Message, state: FSMContext):
         await message.answer(txt.BACK_TEXT, reply_markup=nav.selections_menu)
 
     elif len(a) < 65 and a.find("'") < 0 and a.count(',') == 4:
-        matches = connect.find_matches(mean=("'" + a + "'"), column='address')
+        matches = connect.find_matches(mean=a, column='address')
         if matches[0]:
             await state.finish()
-            await states.YesNoTelephone.y.set()
+            await states.YesNoDict.y.set()
             await message.reply(f'{txt.USER_FIND_TEXT_P1} {strip_all(str(matches[1]))}'
                                 f'{txt.USER_FIND_TEXT_P2}', reply_markup=nav.selections_menu)
         else:
             await state.finish()
             delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
-            add.add_two(first_value=int(message.from_user.id), second_value=("'" + a + "'"), first_column='user_id',
+            add.add_two(first_value=int(message.from_user.id), second_value=a, first_column='user_id',
                         second_column='message', table='messages')
-            await states.YesNoTelephone.y.set()
+            await states.YesNoDict.y.set()
             await message.reply(txt.USER_NFIND_TEXT, reply_markup=nav.yesno_menu)
 
     else:
@@ -509,7 +504,6 @@ async def add_info_address(message: types.Message, state: FSMContext):
     if y == '👍Да':
         await state.finish()
         await states.DoReport.r.set()
-        delete.delete_where(data=int(message.from_user.id), table='address_dict', column='user_id')
         await message.answer(txt.YES_TEXT, reply_markup=nav.report_menu)
 
     elif y == '👎Нет':
@@ -519,7 +513,6 @@ async def add_info_address(message: types.Message, state: FSMContext):
 
     elif y == '❌Отменить действие':
         await state.finish()
-        delete.delete_where(data=int(message.from_user.id), table='address_dict', column='user_id')
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
 
     else:
@@ -532,16 +525,14 @@ async def add_docs_address(message: types.Message, state: FSMContext):
     n = message.text
     if n == '❌Отменить действие':
         await state.finish()
-        delete.delete_where(data=int(message.from_user.id), table='address_dict', column='user_id')
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.main_menu)
 
     elif 22 < len(n) < 256 and (n[0:24] == txt.YOUTUBE_C or n[0:23] == txt.YOUTUBE_CN or n[0:22] == txt.YOUTUBE_CM or
                                 n[0:21] == txt.YOUTUBE_CMN or n[0:17] == txt.YOUTUBE_BEC or n[0:16] == txt.YOUTUBE_BECN
                                 or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN) and n.find("'") < 0:
         await state.finish()
-        add.add_two(first_value=("'" + n + "'"), second_value=("'" + plus_dict(message) + "'"), first_column='docers',
+        add.add_two(first_value=n, second_value=plus_dict(message), first_column='docers',
                     second_column='address', table='cards_report')
-        delete.delete_where(data=int(message.from_user.id), table='address_dict', column='user_id')
         await message.answer(txt.DOCS_TEXT, reply_markup=nav.main_menu)
 
     else:
@@ -549,7 +540,7 @@ async def add_docs_address(message: types.Message, state: FSMContext):
 
 
 @dp.message_handler(commands='ahelp')
-async def start(message: types.Message):
+async def ahelp(message: types.Message):
     """ Function of admin help """
     if connect.find_matches_where_one(data=int(message.from_user.id), find_column='user_id', table='admin_panel',
                                       where_column='user_id'):
@@ -559,10 +550,57 @@ async def start(message: types.Message):
 
 
 @dp.message_handler(commands='apanel')
-async def start(message: types.Message):
+async def apanel(message: types.Message, state: FSMContext):
     """ Function of admin registration """
-    connect.find_matches_where_two(data=int(message.from_user.id), find_column_one='user_id',
-                                   find_column_two='user_password', table='admin_panel', where_column='user_id')
+    await state.reset_state()
+    access = connect.find_matches_where_two(data=int(message.from_user.id), find_column_one='user_id',
+                                            find_column_two='user_password', table='admin_panel',
+                                            where_column='user_id')
+    if len(access) == 2:
+        await states.EnterAdmin.e.set()
+        await message.answer(txt.APASSWORD_TEXT, reply_markup=nav.o_cancel_menu)
+    elif len(access) == 1:
+        await states.CreateApassword.c.set()
+        await message.answer(txt.CREATE_PASSWORD_TEXT, reply_markup=nav.cancel_menu)
+    else:
+        await message.answer(txt.ACCESS_TEXT, reply_markup=nav.main_menu)
+
+
+@dp.message_handler(state=states.CreateApassword.c)
+async def create_apassword(message: types.Message, state: FSMContext):
+    """ Function of create password for admin """
+    c = message.text
+    if c == '❌Отменить действие':
+        await state.finish()
+        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.main_menu)
+    elif 4 <= len(c) < 33 and c.find("'") < 0:
+        update.update_where(data_what=c, data_where=message.from_user.id, table_what='user_password',
+                            table_where='user_id', table='admin_panel')
+        await state.finish()
+        await states.Apanel.a.set()
+        await message.answer(txt.ACCEPT_PASSWORD_TEXT)
+    else:
+        await message.answer(txt.WRONG_TEXT)
+
+
+@dp.message_handler(state=states.EnterAdmin.e)
+async def apassword(message: types.Message, state: FSMContext):
+    e = message.text
+    if e == '❌Отменить действие':
+        await state.finish()
+        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.main_menu)
+    elif 4 <= len(e) < 33 and e.find("'") < 0:
+        # connect.find_matches_where_one(data=)
+        await state.finish()
+        await states.Apanel.a.set()
+        await message.answer(txt.ACCEPT_PASSWORD_TEXT)
+    else:
+        await message.answer(txt.WRONG_TEXT)
+
+
+@dp.message_handler(state=states.Apanel.a)
+async def admin(message: types.Message, state: FSMContext):
+    pass
 
 
 @dp.message_handler(Text(equals='❌Отменить действие'))
@@ -586,6 +624,7 @@ if __name__ == '__main__':
     connect = FindUser()
     add = AddUser()
     delete = DeleteInfo()
+    update = UpdateInfo()
     ClearMessages()
     print('[INFO] Modules launched successfully!')
     executor.start_polling(dp)

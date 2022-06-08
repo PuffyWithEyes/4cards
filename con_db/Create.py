@@ -61,7 +61,6 @@ class Create(Connect):
             cursor.execute(sql.DROP_CARDS_REPORT)
             cursor.execute(sql.DROP_MESSAGES)
             cursor.execute(sql.DROP_ADMIN_PANEL)
-            cursor.execute(sql.DROP_ADDRESS_DICT)
             cursor.execute(sql.DROP_CARDS_TRUE)
 
         self._close_connection()
@@ -70,8 +69,11 @@ class Create(Connect):
         """ This function create all PostgreSQL's tables """
         self._connect()
         with self.connection.cursor() as cursor:
+            try:
+                cursor.execute(sql.DATABASE)
+            except Exception as ex:
+                print('[INFO] Most likely the database already exists, or something is broken.\nThe code: ', ex)
             cursor.execute(sql.ADMIN_PANEL)
-            cursor.execute(sql.ADDRESS_DICT)
             cursor.execute(sql.MESSAGES)
             cursor.execute(sql.CARDS_TRUE)
             cursor.execute(sql.CARDS_REPORT)

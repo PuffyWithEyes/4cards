@@ -1,5 +1,5 @@
 """ Buttons for Telegram-bot """
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 
 
 btn_info = KeyboardButton('ℹИнформация')
@@ -27,3 +27,5 @@ cancel_menu = ReplyKeyboardMarkup(resize_keyboard=True).add(btn_back, btn_cancel
 selections_menu = ReplyKeyboardMarkup(resize_keyboard=True).add(btn_add, btn_delete, btn_back)
 yesno_menu = ReplyKeyboardMarkup(resize_keyboard=True).add(btn_yes, btn_no)
 o_cancel_menu = ReplyKeyboardMarkup(resize_keyboard=True).add(btn_cancel)
+
+remove_markup = ReplyKeyboardRemove()
