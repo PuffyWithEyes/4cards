@@ -8,7 +8,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from con_db.actions_db import FindUser, AddUser, DeleteInfo, UpdateInfo
 import states
 import data.text as txt
-from instruments import strip_all, strip_list
+from instruments import strip_all, strip_list, check_place, strip_alist
 from con_db.ClearMessages import ClearMessages
 from con_db.Create import Create
 import asyncio
@@ -113,7 +113,7 @@ async def check_vk(message: types.Message, state: FSMContext):
         await message.answer(txt.BACK_TEXT, reply_markup=nav.selections_menu)
         
     elif 15 < len(s) < 129 and (s[0:17] == txt.VK_CM or s[0:16] == txt.VK_CMN or s[0:15] == txt.VK_C or s[0:14] ==
-                                txt.VK_CN) and s.find("'") < 0:
+                                txt.VK_CN) and s.find("'") < 0 and s.find(' ') < 0:
         matches = connect.find_matches(mean=s, column='share_vk')
 
         if matches[0]:
@@ -167,7 +167,8 @@ async def add_docs_vk(message: types.Message, state: FSMContext):
 
     elif 22 < len(n) < 256 and (n[0:24] == txt.YOUTUBE_C or n[0:23] == txt.YOUTUBE_CN or n[0:22] == txt.YOUTUBE_CM or
                                 n[0:21] == txt.YOUTUBE_CMN or n[0:17] == txt.YOUTUBE_BEC or n[0:16] == txt.YOUTUBE_BECN
-                                or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN) and n.find("'") < 0:
+                                or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN) and n.find("'") < 0 \
+            and n.find(' ') < 0:
         await state.finish()
         data = strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='message',
                                                             table='messages', where_column='user_id')))
@@ -192,7 +193,7 @@ async def check_tg(message: types.Message, state: FSMContext):
         await state.finish()
         await message.answer(txt.BACK_TEXT, reply_markup=nav.selections_menu)
 
-    elif len(i) < 65 and i.find("'") < 0:
+    elif len(i) < 65 and i.find("'") < 0 and i.find(' ') < 0:
         matches = connect.find_matches(mean=i, column='share_tg')
 
         if matches[0]:
@@ -246,7 +247,8 @@ async def add_docs_tg(message: types.Message, state: FSMContext):
 
     elif 22 < len(n) < 256 and (n[0:24] == txt.YOUTUBE_C or n[0:23] == txt.YOUTUBE_CN or n[0:22] == txt.YOUTUBE_CM or
                                 n[0:21] == txt.YOUTUBE_CMN or n[0:17] == txt.YOUTUBE_BEC or n[0:16] == txt.YOUTUBE_BECN
-                                or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN) and n.find("'") < 0:
+                                or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN) and n.find("'") < 0\
+            and n.find(' ') < 0:
         await state.finish()
         data = strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='message',
                                                             table='messages', where_column='user_id')))
@@ -271,7 +273,7 @@ async def check_card(message: types.Message, state: FSMContext):
         await state.finish()
         await message.answer(txt.BACK_TEXT, reply_markup=nav.selections_menu)
 
-    elif len(c) == 16 and c.find("'") < 0 and isinstance(int(c), int):
+    elif len(c) == 16 and isinstance(int(c), int):
         matches = connect.find_matches(mean=int(c), column='cnumber')
 
         if matches[0]:
@@ -325,7 +327,8 @@ async def add_docs_card(message: types.Message, state: FSMContext):
 
     elif 22 < len(n) < 256 and (n[0:24] == txt.YOUTUBE_C or n[0:23] == txt.YOUTUBE_CN or n[0:22] == txt.YOUTUBE_CM or
                                 n[0:21] == txt.YOUTUBE_CMN or n[0:17] == txt.YOUTUBE_BEC or n[0:16] == txt.YOUTUBE_BECN
-                                or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN) and n.find("'") < 0:
+                                or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN) and n.find("'") < 0 \
+            and n.find(' ') < 0:
         await state.finish()
         data = strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='message',
                                                             table='messages', where_column='user_id')))
@@ -350,7 +353,7 @@ async def check_telephone(message: types.Message, state: FSMContext):
         await state.finish()
         await message.answer(txt.BACK_TEXT, reply_markup=nav.selections_menu)
 
-    elif len(t) < 17 and t.find("'") < 0 and t[0] == '+':
+    elif len(t) < 17 and t.find("'") < 0 and t[0] == '+' and t.find(' ') < 0:
         matches = connect.find_matches(mean=t, column='tnumber')
 
         if matches[0]:
@@ -404,7 +407,8 @@ async def add_docs_telephone(message: types.Message, state: FSMContext):
 
     elif 22 < len(n) < 256 and (n[0:24] == txt.YOUTUBE_C or n[0:23] == txt.YOUTUBE_CN or n[0:22] == txt.YOUTUBE_CM or
                                 n[0:21] == txt.YOUTUBE_CMN or n[0:17] == txt.YOUTUBE_BEC or n[0:16] == txt.YOUTUBE_BECN
-                                or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN) and n.find("'") < 0:
+                                or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN) and n.find("'") < 0 \
+            and n.find(' ') < 0:
         await state.finish()
         data = strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='message',
                                                             table='messages', where_column='user_id')))
@@ -455,7 +459,8 @@ async def add_docs_card(message: types.Message, state: FSMContext):
 
     elif 22 < len(d) < 256 and (d[0:24] == txt.YOUTUBE_C or d[0:23] == txt.YOUTUBE_CN or d[0:22] == txt.YOUTUBE_CM or
                                 d[0:21] == txt.YOUTUBE_CMN or d[0:17] == txt.YOUTUBE_BEC or d[0:16] == txt.YOUTUBE_BECN
-                                or d[0:19] == txt.YOUTUBE_BEMC or d[0:18] == txt.YOUTUBE_BEMCN) and d.find("'") < 0:
+                                or d[0:19] == txt.YOUTUBE_BEMC or d[0:18] == txt.YOUTUBE_BEMCN) and d.find("'") < 0 \
+            and d.find(' ') < 0:
         await state.finish()
         data = strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='message',
                                                             table='messages', where_column='user_id')))
@@ -598,10 +603,14 @@ async def apassword(message: types.Message, state: FSMContext):
                                                               where_column='user_id')))
         if int(login[0]) == int(message.from_user.id) and str(login[1]) == str(e):
             await state.finish()
+            social_credit = str(strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id),
+                                                                             find_column='social_credit',
+                                                                             table='admin_panel',
+                                                                             where_column='user_id'))))
+            all_rating = strip_alist(str(connect.find_what_one(where='social_credit', table='admin_panel', flag=False)))
             await states.Apanel.a.set()
-            social_credit = int(connect.find_matches_where_one(data=int(message.from_user.id),
-                                                               find_column='social_credit', table='admin_panel', where_column='user_id'))
-            await message.answer((txt.AENTER_TEXT_P1), social_credit, )
+            await message.answer(f"{txt.AENTER_TEXT_P1}{social_credit}{txt.AENTER_TEXT_P2}"
+                                 f"{check_place(value_list=all_rating, data=all_rating)}{txt.AENTER_TEXT_P3}")
         else:
             await message.answer(txt.INCORRECT_TEXT)
     else:
@@ -610,11 +619,8 @@ async def apassword(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=states.Apanel.a)
 async def admin(message: types.Message, state: FSMContext):
-    await message.answer('')
     while True:
-        await asyncio.sleep(1)
-        print(1)
-        await message.answer(str(connect.find_all(table='cards_report')))
+        await admins()
 
 
 @dp.message_handler(Text(equals='❌Отменить действие'))
