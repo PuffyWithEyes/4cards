@@ -659,12 +659,14 @@ async def a_password(message: types.Message, state: FSMContext):
 
 @dp.message_handler(commands='q', state=states.Apanel.a)
 async def q(message: types.Message, state: FSMContext):
+    """ Function for quit from admin's account """
     await state.finish()
     await message.answer('Вы прекратили админиситрирование')
 
 
 @dp.message_handler(commands='reports', state=states.Apanel.a)
 async def reports(message: types.Message):
+    """ Function for check all reports """
     count = 0
     await message.answer(txt.AVAILABLE_TEXT)
     for i in strip_report(str(connect.find_what_where(data='False', where='id', table='cards_report', bar='take',
@@ -677,15 +679,15 @@ async def reports(message: types.Message):
 
 
 @dp.message_handler(commands='recon', state=states.Apanel.a)
-async def admin(message: types.Message):
+async def admin(message: types.Message, state: FSMContext):
     """ Function of report """
     m = message.text
     m = m.split(' ')
     if len(m) == 2 and m[1].isdigit():
         report = strip_parentheses(str(connect.find_what_where(data=m[1], where='*', table='cards_report', bar='id',
                                                                flag=False)))
-        print(report)
-        if report:
+        # Сделать проверку флага
+        if str(report) != "['[]']":
             await message.answer(f"""Такой репорт найден!\n
             Номер человека: {report[1].replace("'", '')}
             Номер карты человека: {report[2].replace("'", '')}
@@ -693,7 +695,28 @@ async def admin(message: types.Message):
             ID в Telegram: {report[4].replace("'", '')}
             Имеющийся ID в БАЗЕ ДАННЫХ: {report[6].replace("'", '')}
             \nДоказательства (ПЕРЕХОДИТЕ ТОЛЬКО ПО ЮТУБ ССЫЛКАМ, ЭТО СДЕЛАНО ДЛЯ ВАШЕЙ БЕЗОПАСНОСТИ!): 
-        {report[5].replace("'", '')}""")
+        {report[5].replace("'", '')}\n
+/accept - принять жалобу (Если форма заполнена правильно и док-ва не являются подделкой)
+/cancel - отвергнуть жалобу (Если форма заполнена неправильно и док-ва являются подделкой)""")
+            update.update_where(data_what=True, data_where=m[1], table_what='take', table_where='id',
+                                table='cards_report')
+            await states.Accept.a.set()
+            await state.finish()
+        else:
+            await message.answer(txt.NOT_REPORT_TEXT)
+    else:
+        await message.answer(txt.NOT_REPORT_TEXT)
+
+
+# Почему-то не откликается
+@dp.message_handler(commands='accept', state=states.Accept.a)
+async def cancel_action(message: types.Message, state: FSMContext):
+    await message.answer('accepted')
+
+
+@dp.message_handler(commands='cancel', state=states.Accept.a)
+async def cancel_action(message: types.Message, state: FSMContext):
+    await message.answer('canceled')
 
 
 @dp.message_handler(Text(equals='❌Отменить действие'))

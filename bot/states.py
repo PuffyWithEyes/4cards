@@ -92,3 +92,7 @@ class SetAdminPassword(StatesGroup):
 
 class SetAdmin(StatesGroup):
     s = State()
+
+
+class Accept(StatesGroup):
+    a = State()
