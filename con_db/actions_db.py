@@ -58,6 +58,21 @@ class FindUser(Connect):
         self._close_connection()
         return data_db
 
+    def find_what_where(self, data, where: str, table: str, bar: str, flag: bool):
+        """ Find all data from some table """
+        self._connect()
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                f"""SELECT {where} FROM {table} WHERE {bar}='{data}';"""
+            )
+            if flag:
+                data_db = cursor.fetchone()
+            else:
+                data_db = cursor.fetchall()
+
+        self._close_connection()
+        return data_db
+
 
 class AddUser(Connect):
     def add_info(self, value, column: str, table: str):

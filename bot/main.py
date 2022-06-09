@@ -1,6 +1,6 @@
 # Script for python version 3.9 and for Debian Linux
 from aiogram import Bot, Dispatcher, executor, types
-from bot.config import TOKEN
+from bot.config import TOKEN, RED_ADMIN, RED_ADMIN_PASSWORD
 from aiogram.dispatcher.filters import Text
 import data.markup as nav
 from aiogram.dispatcher import FSMContext
@@ -8,11 +8,10 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from con_db.actions_db import FindUser, AddUser, DeleteInfo, UpdateInfo
 import states
 import data.text as txt
-from instruments import strip_all, strip_list, check_place, strip_alist
+from instruments import strip_all, strip_list, check_place, strip_alist, strip_report
 from con_db.ClearMessages import ClearMessages
 from con_db.Create import Create
-import asyncio
-from con_db.admins import admins
+from bot.instruments import strip_parentheses
 
 
 # Global settings for the bot
@@ -547,8 +546,8 @@ async def add_docs_card(message: types.Message, state: FSMContext):
 
 
 @dp.message_handler(commands='ahelp')
-async def ahelp(message: types.Message):
-    """ Function of admin help """
+async def a_help(message: types.Message):
+    """ Function of admins' help """
     if connect.find_matches_where_one(data=int(message.from_user.id), find_column='user_id', table='admin_panel',
                                       where_column='user_id'):
         await message.answer(txt.ADMIN_HELP_TEXT, reply_markup=nav.main_menu)
@@ -556,8 +555,39 @@ async def ahelp(message: types.Message):
         await message.answer(txt.ACCESS_TEXT, reply_markup=nav.main_menu)
 
 
+@dp.message_handler(commands='sudo')
+async def set_admin(message: types.Message):
+    """ Function for set admins in database """
+    if int(message.from_user.id) == int(RED_ADMIN):
+        await states.SetAdminPassword.s.set()
+        await message.answer(txt.SUDO_TEXT)
+    else:
+        await message.answer(txt.ACCESS_TEXT)
+
+
+@dp.message_handler(state=states.SetAdminPassword.s)
+async def enter_admin_password(message: types.Message, state: FSMContext):
+    """ Function for sudo admin """
+    s = message.text
+    if int(s) == int(RED_ADMIN_PASSWORD):
+        await states.SetAdmin.s.set()
+        await message.answer(txt.SET_ADMIN_TEXT)
+    else:
+        await state.finish()
+        await message.answer(txt.ACCESS_TEXT)
+
+
+@dp.message_handler(state=states.SetAdmin.s)
+async def create_admin(message: types.Message, state: FSMContext):
+    """ Function for sudo admin """
+    s = message.text
+    add.add_info(value=s, column='user_id', table='admin_panel')
+    await state.finish()
+    await message.answer(txt.DONE_TEXT)
+
+
 @dp.message_handler(commands='apanel')
-async def apanel(message: types.Message, state: FSMContext):
+async def a_panel(message: types.Message, state: FSMContext):
     """ Function of admin registration """
     await state.reset_state()
     access = len(strip_list(str(connect.find_matches_where_two(data=int(message.from_user.id),
@@ -575,7 +605,7 @@ async def apanel(message: types.Message, state: FSMContext):
 
 
 @dp.message_handler(state=states.CreateApassword.c)
-async def create_apassword(message: types.Message, state: FSMContext):
+async def create_a_password(message: types.Message, state: FSMContext):
     """ Function of create password for admin """
     c = message.text
     if c == '❌Отменить действие':
@@ -592,7 +622,8 @@ async def create_apassword(message: types.Message, state: FSMContext):
 
 
 @dp.message_handler(state=states.EnterAdmin.e)
-async def apassword(message: types.Message, state: FSMContext):
+async def a_password(message: types.Message, state: FSMContext):
+    """ Function for enter admin enter your account """
     e = message.text
     if e == '❌Отменить действие':
         await state.finish()
@@ -608,19 +639,61 @@ async def apassword(message: types.Message, state: FSMContext):
                                                                              table='admin_panel',
                                                                              where_column='user_id'))))
             all_rating = strip_alist(str(connect.find_what_one(where='social_credit', table='admin_panel', flag=False)))
+            all_data = strip_report(str(connect.find_what_where(data='False', where='id', table='cards_report',
+                                                                bar='take', flag=False)))
             await states.Apanel.a.set()
             await message.answer(f"{txt.AENTER_TEXT_P1}{social_credit}{txt.AENTER_TEXT_P2}"
-                                 f"{check_place(value_list=all_rating, data=all_rating)}{txt.AENTER_TEXT_P3}")
+                                 f"{check_place(value_list=all_rating, data=all_rating)}{txt.AENTER_TEXT_P3}",
+                                 reply_markup=nav.remove_markup)
+            count = 0
+            for i in all_data:
+                if count < 6:
+                    await message.answer(f"№{i}")
+                else:
+                    break
         else:
             await message.answer(txt.INCORRECT_TEXT)
     else:
         await message.answer(txt.WRONG_TEXT)
 
 
-@dp.message_handler(state=states.Apanel.a)
-async def admin(message: types.Message, state: FSMContext):
-    while True:
-        await admins()
+@dp.message_handler(commands='q', state=states.Apanel.a)
+async def q(message: types.Message, state: FSMContext):
+    await state.finish()
+    await message.answer('Вы прекратили админиситрирование')
+
+
+@dp.message_handler(commands='reports', state=states.Apanel.a)
+async def reports(message: types.Message):
+    count = 0
+    await message.answer(txt.AVAILABLE_TEXT)
+    for i in strip_report(str(connect.find_what_where(data='False', where='id', table='cards_report', bar='take',
+                                                      flag=False))):
+        if count < 6:
+            await message.answer(f"№{i}")
+        else:
+            break
+    count += 1
+
+
+@dp.message_handler(commands='recon', state=states.Apanel.a)
+async def admin(message: types.Message):
+    """ Function of report """
+    m = message.text
+    m = m.split(' ')
+    if len(m) == 2 and m[1].isdigit():
+        report = strip_parentheses(str(connect.find_what_where(data=m[1], where='*', table='cards_report', bar='id',
+                                                               flag=False)))
+        print(report)
+        if report:
+            await message.answer(f"""Такой репорт найден!\n
+            Номер человека: {report[1].replace("'", '')}
+            Номер карты человека: {report[2].replace("'", '')}
+            Ссылка на ВКонтакте: {report[3].replace("'", '')}
+            ID в Telegram: {report[4].replace("'", '')}
+            Имеющийся ID в БАЗЕ ДАННЫХ: {report[6].replace("'", '')}
+            \nДоказательства (ПЕРЕХОДИТЕ ТОЛЬКО ПО ЮТУБ ССЫЛКАМ, ЭТО СДЕЛАНО ДЛЯ ВАШЕЙ БЕЗОПАСНОСТИ!): 
+        {report[5].replace("'", '')}""")
 
 
 @dp.message_handler(Text(equals='❌Отменить действие'))

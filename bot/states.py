@@ -84,3 +84,11 @@ class Apanel(StatesGroup):
 
 class EnterAdmin(StatesGroup):
     e = State()
+
+
+class SetAdminPassword(StatesGroup):
+    s = State()
+
+
+class SetAdmin(StatesGroup):
+    s = State()
