@@ -19,26 +19,33 @@ class FindUser(Connect):
             self._close_connection()
             return [find, user_id]
 
-    def find_matches_where_one(self, data, find_column: str, table: str, where_column: str):
+    def find_matches_where_one(self, data, find_column: str, table: str, where_column: str, flag: bool):
         """ Function for find matches in 1 column """
         self._connect()
         with self.connection.cursor() as cursor:
             cursor.execute(
                 f"""SELECT {find_column} FROM {table} WHERE {where_column}='{data}';"""
             )
-            data_db = cursor.fetchone()
+            if flag:
+                data_db = cursor.fetchone()
+            else:
+                data_db = cursor.fetchall()
 
         self._close_connection()
         return data_db
 
-    def find_matches_where_two(self, data, find_column_one: str, find_column_two: str, table: str, where_column: str):
+    def find_matches_where_two(self, data, find_column_one: str, find_column_two: str, table: str, where_column: str,
+                               flag: bool):
         """ Function for find matches in 2 column """
         self._connect()
         with self.connection.cursor() as cursor:
             cursor.execute(
                 f"""SELECT ({find_column_one}, {find_column_two}) FROM {table} WHERE {where_column}='{data}';"""
             )
-            data_db = cursor.fetchone()
+            if flag:
+                data_db = cursor.fetchone()
+            else:
+                data_db = cursor.fetchall()
 
         self._close_connection()
         return data_db
@@ -49,21 +56,6 @@ class FindUser(Connect):
         with self.connection.cursor() as cursor:
             cursor.execute(
                 f"""SELECT {where} FROM {table};"""
-            )
-            if flag:
-                data_db = cursor.fetchone()
-            else:
-                data_db = cursor.fetchall()
-
-        self._close_connection()
-        return data_db
-
-    def find_what_where(self, data, where: str, table: str, bar: str, flag: bool):
-        """ Find all data from some table """
-        self._connect()
-        with self.connection.cursor() as cursor:
-            cursor.execute(
-                f"""SELECT {where} FROM {table} WHERE {bar}='{data}';"""
             )
             if flag:
                 data_db = cursor.fetchone()
@@ -103,6 +95,20 @@ class AddUser(Connect):
             cursor.execute(
                 f"""INSERT INTO {table} ({first_column}, {second_column}, {third_column}) VALUES ('{first_value}', 
 '{second_value}', '{third_value}');"""
+            )
+
+        self._close_connection()
+
+    def add_all(self, first_data, second_data, third_data, fourth_data, fifth_data, sixth_data, seventh_data,
+                eighth_data, table: str, first_column: str, second_column: str, third_column: str, fourth_column: str,
+                fifth_column: str, sixth_column: str, seventh_column: str, eighth_column: str):
+        """ Insert all data """
+        self._connect()
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                f"""INSERT INTO {table} ({first_column}, {second_column}, {third_column}, {fourth_column}, 
+{fifth_column}, {sixth_column}, {seventh_column}, {eighth_column}) VALUES ({first_data}, {second_data}, 
+{third_data}, {fourth_data}, {fifth_data}, {sixth_data}, {seventh_data}, {eighth_data});"""
             )
 
         self._close_connection()

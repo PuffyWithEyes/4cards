@@ -8,7 +8,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from con_db.actions_db import FindUser, AddUser, DeleteInfo, UpdateInfo
 import states
 import data.text as txt
-from instruments import strip_all, strip_list, check_place, strip_alist, strip_report
+from instruments import strip_all, strip_list, check_place, strip_alist, strip_report, s_none, c_none
 from con_db.ClearMessages import ClearMessages
 from con_db.Create import Create
 from bot.instruments import strip_parentheses
@@ -40,7 +40,187 @@ async def do_report(message: types.Message):
 @dp.message_handler(Text(equals='🔭Найти пользователя'))
 async def find_user(message: types.Message):
     """ Function of search of information about user """
-    await message.answer(txt.FIND_TEXT)
+    await states.FindUsers.f.set()
+    await message.answer(txt.FIND_TEXT, reply_markup=nav.find_menu)
+
+
+@dp.message_handler(state=states.FindUsers.f)
+async def find_user_division(message: types.Message, state: FSMContext):
+    """ Function of report """
+    r = message.text
+    if r == '⛓Проверить ссылку во ВКонтакте':
+        await state.finish()
+        await states.FindShareVK.f.set()
+        await message.reply(txt.VK_TEXT, reply_markup=nav.o_cancel_menu)
+
+    elif r == '🆔Проверить по ID в Telegram':
+        await state.finish()
+        await states.FindIDTG.f.set()
+        await message.reply(txt.TG_TEXT, reply_markup=nav.o_cancel_menu)
+
+    elif r == '💳Проверить по номеру карты':
+        await state.finish()
+        await states.FindCardNumber.f.set()
+        await message.reply(txt.CARD_TEXT, reply_markup=nav.o_cancel_menu)
+
+    elif r == '📞Проверить по номеру телефона':
+        await state.finish()
+        await states.FindTelephoneNumber.f.set()
+        await message.reply(txt.TELEPHONE_TEXT, reply_markup=nav.o_cancel_menu)
+
+    elif r == '🏠Проверить по адресу':
+        await state.finish()
+        await states.FindAddress.f.set()
+        await message.reply(txt.ADDRESS_TEXT, reply_markup=nav.o_cancel_menu)
+
+    elif r == '🔄Вернуться назад':
+        await state.finish()
+        await state.reset_state()
+        await message.answer(txt.BACK_TEXT, reply_markup=nav.selections_menu)
+
+    else:
+        await message.reply(txt.ELSE_TEXT)
+
+
+@dp.message_handler(state=states.FindShareVK.f)
+async def find_share_vk(message: types.Message, state: FSMContext):
+    """ Function for check user's VK's share """
+    f = message.text
+    if f == '❌Отменить действие':
+        await state.finish()
+        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
+
+    elif 15 < len(f) < 129 and (f[0:17] == txt.VK_CM or f[0:16] == txt.VK_CMN or f[0:15] == txt.VK_C or f[0:14] ==
+                                txt.VK_CN) and f.find("'") < 0 and f.find(' ') < 0:
+        matches = connect.find_matches(mean=f, column='share_vk')
+
+        if matches[0]:
+            await state.finish()
+            all_data = strip_parentheses(str(connect.find_matches_where_one(data=f, find_column='*', table='cards_true',
+                                                                            where_column='share_vk', flag=True)))
+            await message.reply(f'{txt.USER_FIND_TEXT_P1} {strip_all(str(matches[1]))}'
+                                f'{txt.USER_FIND_TEXT_P2}\n\nОстальные данные этого мошенника:\n'
+                                f'Номер телефона: {c_none(all_data[1])}\n'
+                                f'Номер карты: {c_none(all_data[2])}\n'
+                                f'Ссылка во ВКонтакте: {c_none(all_data[3])}\n'
+                                f'ID в Telegram: {c_none(all_data[4])}\n'
+                                f'Адрес: {c_none(all_data[6])}\n',
+                                reply_markup=nav.selections_menu)
+
+    else:
+        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+
+
+@dp.message_handler(state=states.FindIDTG.f)
+async def find_share_tg(message: types.Message, state: FSMContext):
+    """ Function for check user's Telegram's share """
+    f = message.text
+    if f == '❌Отменить действие':
+        await state.finish()
+        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
+
+    elif len(f) < 65 and f.find("'") < 0 and f.find(' ') < 0:
+        matches = connect.find_matches(mean=f, column='share_tg')
+
+        if matches[0]:
+            await state.finish()
+            all_data = strip_parentheses(str(connect.find_matches_where_one(data=f, find_column='*', table='cards_true',
+                                                                            where_column='share_tg', flag=True)))
+            await message.reply(f'{txt.USER_FIND_TEXT_P1} {strip_all(str(matches[1]))}'
+                                f'{txt.USER_FIND_TEXT_P2}\n\nОстальные данные этого мошенника:\n'
+                                f'Номер телефона: {c_none(all_data[1])}\n'
+                                f'Номер карты: {c_none(all_data[2])}\n'
+                                f'Ссылка во ВКонтакте: {c_none(all_data[3])}\n'
+                                f'ID в Telegram: {c_none(all_data[4])}\n'
+                                f'Адрес: {c_none(all_data[6])}\n',
+                                reply_markup=nav.selections_menu)
+
+    else:
+        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+
+
+@dp.message_handler(state=states.FindCardNumber.f)
+async def find_card(message: types.Message, state: FSMContext):
+    """ Function for check user's card number's share """
+    f = message.text
+    if f == '❌Отменить действие':
+        await state.finish()
+        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
+
+    elif len(f) == 16 and f.isdigit():
+        matches = connect.find_matches(mean=f, column='cnumber')
+
+        if matches[0]:
+            await state.finish()
+            all_data = strip_parentheses(str(connect.find_matches_where_one(data=f, find_column='*', table='cards_true',
+                                                                            where_column='cnumber', flag=True)))
+            await message.reply(f'{txt.USER_FIND_TEXT_P1} {strip_all(str(matches[1]))}'
+                                f'{txt.USER_FIND_TEXT_P2}\n\nОстальные данные этого мошенника:\n'
+                                f'Номер телефона: {c_none(all_data[1])}\n'
+                                f'Номер карты: {c_none(all_data[2])}\n'
+                                f'Ссылка во ВКонтакте: {c_none(all_data[3])}\n'
+                                f'ID в Telegram: {c_none(all_data[4])}\n'
+                                f'Адрес: {c_none(all_data[6])}\n',
+                                reply_markup=nav.selections_menu)
+
+    else:
+        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+
+
+@dp.message_handler(state=states.FindCardNumber.f)
+async def find_telephone(message: types.Message, state: FSMContext):
+    """ Function for check user's telephone number's share """
+    f = message.text
+    if f == '❌Отменить действие':
+        await state.finish()
+        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
+
+    elif len(f) < 17 and f.find("'") < 0 and f[0] == '+' and f.find(' ') < 0:
+        matches = connect.find_matches(mean=f, column='tnumber')
+
+        if matches[0]:
+            await state.finish()
+            all_data = strip_parentheses(str(connect.find_matches_where_one(data=f, find_column='*', table='cards_true',
+                                                                            where_column='tnumber', flag=True)))
+            await message.reply(f'{txt.USER_FIND_TEXT_P1} {strip_all(str(matches[1]))}'
+                                f'{txt.USER_FIND_TEXT_P2}\n\nОстальные данные этого мошенника:\n'
+                                f'Номер телефона: {c_none(all_data[1])}\n'
+                                f'Номер карты: {c_none(all_data[2])}\n'
+                                f'Ссылка во ВКонтакте: {c_none(all_data[3])}\n'
+                                f'ID в Telegram: {c_none(all_data[4])}\n'
+                                f'Адрес: {c_none(all_data[6])}\n',
+                                reply_markup=nav.selections_menu)
+
+    else:
+        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+
+
+@dp.message_handler(state=states.FindCardNumber.f)
+async def find_address(message: types.Message, state: FSMContext):
+    """ Function for check user's address's share """
+    f = message.text
+    if f == '❌Отменить действие':
+        await state.finish()
+        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
+
+    elif f.find("'") < 0 and f.find(' ') < 0:
+        matches = connect.find_matches(mean=f, column='address')
+
+        if matches[0]:
+            await state.finish()
+            all_data = strip_parentheses(str(connect.find_matches_where_one(data=f, find_column='*', table='cards_true',
+                                                                            where_column='address', flag=True)))
+            await message.reply(f'{txt.USER_FIND_TEXT_P1} {strip_all(str(matches[1]))}'
+                                f'{txt.USER_FIND_TEXT_P2}\n\nОстальные данные этого мошенника:\n'
+                                f'Номер телефона: {c_none(all_data[1])}\n'
+                                f'Номер карты: {c_none(all_data[2])}\n'
+                                f'Ссылка во ВКонтакте: {c_none(all_data[3])}\n'
+                                f'ID в Telegram: {c_none(all_data[4])}\n'
+                                f'Адрес: {c_none(all_data[6])}\n',
+                                reply_markup=nav.selections_menu)
+
+    else:
+        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
 
 
 @dp.message_handler(Text(equals='➕Подать жалобу на внесение в ЧС'))
@@ -53,7 +233,19 @@ async def add_user(message: types.Message):
 @dp.message_handler(Text(equals='➖Подать жалобу на удаление из ЧС'))
 async def delete_user(message: types.Message):
     """ Function for delete user from black list """
-    await message.answer(txt.DELETE_TEXT)
+    await states.NotDo.n.set()
+    await message.answer(txt.DELETE_TEXT, reply_markup=nav.o_cancel_menu)
+
+
+@dp.message_handler(state=states.NotDo.n)
+async def delete_user(message: types.Message, state: FSMContext):
+    """ Function for ask id from black list """
+    n = message.text
+    if n == '❌Отменить действие':
+        await state.finish()
+        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
+    elif n.isdigit():
+        await message.answer('В разработке')
 
 
 @dp.message_handler(state=states.DoReport.r)
@@ -117,9 +309,16 @@ async def check_vk(message: types.Message, state: FSMContext):
 
         if matches[0]:
             await state.finish()
-            await states.YesNoVK.y.set()
+            all_data = strip_parentheses(str(connect.find_matches_where_one(data=s, find_column='*', table='cards_true',
+                                                                            where_column='share_vk', flag=True)))
             await message.reply(f'{txt.USER_FIND_TEXT_P1} {strip_all(str(matches[1]))}'
-                                f'{txt.USER_FIND_TEXT_P2}', reply_markup=nav.selections_menu)
+                                f'{txt.USER_FIND_TEXT_P2}\n\nОстальные данные этого мошенника:\n'
+                                f'Номер телефона: {c_none(all_data[1])}\n'
+                                f'Номер карты: {c_none(all_data[2])}\n'
+                                f'Ссылка во ВКонтакте: {c_none(all_data[3])}\n'
+                                f'ID в Telegram: {c_none(all_data[4])}\n'
+                                f'Адрес: {c_none(all_data[6])}\n',
+                                reply_markup=nav.selections_menu)
         else:
             await state.finish()
             await states.YesNoVK.y.set()
@@ -170,7 +369,7 @@ async def add_docs_vk(message: types.Message, state: FSMContext):
             and n.find(' ') < 0:
         await state.finish()
         data = strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='message',
-                                                            table='messages', where_column='user_id')))
+                                                            table='messages', where_column='user_id', flag=True)))
         add.add_two(first_value=n, second_value=data, first_column='docers',
                     second_column='share_vk', table='cards_report')
         delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
@@ -197,9 +396,16 @@ async def check_tg(message: types.Message, state: FSMContext):
 
         if matches[0]:
             await state.finish()
-            await states.YesNoTG.y.set()
+            all_data = strip_parentheses(str(connect.find_matches_where_one(data=i, find_column='*', table='cards_true',
+                                                                            where_column='share_tg', flag=True)))
             await message.reply(f'{txt.USER_FIND_TEXT_P1} {strip_all(str(matches[1]))}'
-                                f'{txt.USER_FIND_TEXT_P2}', reply_markup=nav.selections_menu)
+                                f'{txt.USER_FIND_TEXT_P2}\n\nОстальные данные этого мошенника:\n'
+                                f'Номер телефона: {c_none(all_data[1])}\n'
+                                f'Номер карты: {c_none(all_data[2])}\n'
+                                f'Ссылка во ВКонтакте: {c_none(all_data[3])}\n'
+                                f'ID в Telegram: {c_none(all_data[4])}\n'
+                                f'Адрес: {c_none(all_data[6])}\n',
+                                reply_markup=nav.selections_menu)
         else:
             await state.finish()
             delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
@@ -250,7 +456,7 @@ async def add_docs_tg(message: types.Message, state: FSMContext):
             and n.find(' ') < 0:
         await state.finish()
         data = strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='message',
-                                                            table='messages', where_column='user_id')))
+                                                            table='messages', where_column='user_id', flag=True)))
         add.add_two(first_value=n, second_value=data, first_column='docers',
                     second_column='share_tg', table='cards_report')
         delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
@@ -272,14 +478,21 @@ async def check_card(message: types.Message, state: FSMContext):
         await state.finish()
         await message.answer(txt.BACK_TEXT, reply_markup=nav.selections_menu)
 
-    elif len(c) == 16 and isinstance(int(c), int):
+    elif len(c) == 16 and c.isdigit():
         matches = connect.find_matches(mean=int(c), column='cnumber')
 
         if matches[0]:
             await state.finish()
-            await states.YesNoCard.y.set()
+            all_data = strip_parentheses(str(connect.find_matches_where_one(data=c, find_column='*', table='cards_true',
+                                                                            where_column='cnumber', flag=True)))
             await message.reply(f'{txt.USER_FIND_TEXT_P1} {strip_all(str(matches[1]))}'
-                                f'{txt.USER_FIND_TEXT_P2}', reply_markup=nav.selections_menu)
+                                f'{txt.USER_FIND_TEXT_P2}\n\nОстальные данные этого мошенника:\n'
+                                f'Номер телефона: {c_none(all_data[1])}\n'
+                                f'Номер карты: {c_none(all_data[2])}\n'
+                                f'Ссылка во ВКонтакте: {c_none(all_data[3])}\n'
+                                f'ID в Telegram: {c_none(all_data[4])}\n'
+                                f'Адрес: {c_none(all_data[6])}\n',
+                                reply_markup=nav.selections_menu)
         else:
             await state.finish()
             delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
@@ -330,7 +543,7 @@ async def add_docs_card(message: types.Message, state: FSMContext):
             and n.find(' ') < 0:
         await state.finish()
         data = strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='message',
-                                                            table='messages', where_column='user_id')))
+                                                            table='messages', where_column='user_id', flag=True)))
         add.add_two(first_value=n, second_value=int(data), first_column='docers', second_column='cnumber',
                     table='cards_report')
         delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
@@ -357,9 +570,16 @@ async def check_telephone(message: types.Message, state: FSMContext):
 
         if matches[0]:
             await state.finish()
-            await states.YesNoTelephone.y.set()
+            all_data = strip_parentheses(str(connect.find_matches_where_one(data=t, find_column='*', table='cards_true',
+                                                                            where_column='tnumber', flag=True)))
             await message.reply(f'{txt.USER_FIND_TEXT_P1} {strip_all(str(matches[1]))}'
-                                f'{txt.USER_FIND_TEXT_P2}', reply_markup=nav.selections_menu)
+                                f'{txt.USER_FIND_TEXT_P2}\n\nОстальные данные этого мошенника:\n'
+                                f'Номер телефона: {c_none(all_data[1])}\n'
+                                f'Номер карты: {c_none(all_data[2])}\n'
+                                f'Ссылка во ВКонтакте: {c_none(all_data[3])}\n'
+                                f'ID в Telegram: {c_none(all_data[4])}\n'
+                                f'Адрес: {c_none(all_data[6])}\n',
+                                reply_markup=nav.selections_menu)
         else:
             await state.finish()
             delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
@@ -410,7 +630,7 @@ async def add_docs_telephone(message: types.Message, state: FSMContext):
             and n.find(' ') < 0:
         await state.finish()
         data = strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='message',
-                                                            table='messages', where_column='user_id')))
+                                                            table='messages', where_column='user_id', flag=True)))
         add.add_two(first_value=n, second_value=data, first_column='docers',
                     second_column='tnumber', table='cards_report')
         delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
@@ -433,7 +653,8 @@ async def ask_id(message: types.Message, state: FSMContext):
         await message.answer(txt.BACK_TEXT, reply_markup=nav.selections_menu)
 
     elif isinstance(int(i), int):
-        if connect.find_matches_where_one(data=int(i), find_column='id', table='cards_true', where_column='id'):
+        if connect.find_matches_where_one(data=int(i), find_column='id', table='cards_true', where_column='id',
+                                          flag=True):
             await state.finish()
             await message.answer(txt.DOC_TEXT, reply_markup=nav.o_cancel_menu)
             delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
@@ -462,7 +683,7 @@ async def add_docs_card(message: types.Message, state: FSMContext):
             and d.find(' ') < 0:
         await state.finish()
         data = strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='message',
-                                                            table='messages', where_column='user_id')))
+                                                            table='messages', where_column='user_id', flag=True)))
         add.add_two(first_value=d, second_value=int(data), first_column='docers',
                     second_column='got_id', table='cards_report')
         delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
@@ -472,84 +693,18 @@ async def add_docs_card(message: types.Message, state: FSMContext):
         await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
 
 
-# @dp.message_handler(state=states.Address.a)
-# async def check_address(message: types.Message, state: FSMContext):
-#     """ This function ask user swindler's house """
-#     a = message.text
-#     if a == '❌Отменить действие':
-#         await state.finish()
-#         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
-#
-#     elif a == '🔄Вернуться назад':
-#         await state.finish()
-#         await message.answer(txt.BACK_TEXT, reply_markup=nav.selections_menu)
-#
-#     elif len(a) < 65 and a.find("'") < 0 and a.count(',') == 4:
-#         matches = connect.find_matches(mean=a, column='address')
-#         if matches[0]:
-#             await state.finish()
-#             await states.YesNoDict.y.set()
-#             await message.reply(f'{txt.USER_FIND_TEXT_P1} {strip_all(str(matches[1]))}'
-#                                 f'{txt.USER_FIND_TEXT_P2}', reply_markup=nav.selections_menu)
-#         else:
-#             await state.finish()
-#             delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
-#             add.add_two(first_value=int(message.from_user.id), second_value=a, first_column='user_id',
-#                         second_column='message', table='messages')
-#             await states.YesNoDict.y.set()
-#             await message.reply(txt.USER_NFIND_TEXT, reply_markup=nav.yesno_menu)
-#
-#     else:
-#         await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
-#
-#
-# @dp.message_handler(state=states.YesNoDict.y)
-# async def add_info_address(message: types.Message, state: FSMContext):
-#     """ Function for ask user about info """
-#     y = message.text
-#     if y == '👍Да':
-#         await state.finish()
-#         await states.DoReport.r.set()
-#         await message.answer(txt.YES_TEXT, reply_markup=nav.report_menu)
-#
-#     elif y == '👎Нет':
-#         await state.finish()
-#         await states.NoTelephone.n.set()
-#         await message.answer(txt.DOC_TEXT, reply_markup=nav.o_cancel_menu)
-#
-#     elif y == '❌Отменить действие':
-#         await state.finish()
-#         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
-#
-#     else:
-#         await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
-#
-#
-# @dp.message_handler(state=states.NoDict.n)
-# async def add_docs_address(message: types.Message, state: FSMContext):
-#     """ This function add proofs in database """
-#     n = message.text
-#     if n == '❌Отменить действие':
-#         await state.finish()
-#         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.main_menu)
-#
-#     elif 22 < len(n) < 256 and (n[0:24] == txt.YOUTUBE_C or n[0:23] == txt.YOUTUBE_CN or n[0:22] == txt.YOUTUBE_CM or
-#                                 n[0:21] == txt.YOUTUBE_CMN or n[0:17] == txt.YOUTUBE_BEC or n[0:16] == txt.YOUTUBE_BECN
-#                                 or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN) and n.find("'") < 0:
-#         await state.finish()
-#         add.add_two(first_value=n, second_value=plus_dict(message), first_column='docers',
-#                     second_column='address', table='cards_report')
-#         await message.answer(txt.DOCS_TEXT, reply_markup=nav.main_menu)
-#
-#     else:
-#         await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+@dp.message_handler(state=states.Address.a)
+async def check_address(message: types.Message, state: FSMContext):
+    """ This function ask user swindler's house """
+    await message.answer('В разработке')
+    await state.finish()
 
 
 @dp.message_handler(commands='ahelp')
 async def a_help(message: types.Message):
     """ Function of admins' help """
     if connect.find_matches_where_one(data=int(message.from_user.id), find_column='user_id', table='admin_panel',
-                                      where_column='user_id'):
+                                      where_column='user_id', flag=True):
         await message.answer(txt.ADMIN_HELP_TEXT, reply_markup=nav.main_menu)
     else:
         await message.answer(txt.ACCESS_TEXT, reply_markup=nav.main_menu)
@@ -593,7 +748,7 @@ async def a_panel(message: types.Message, state: FSMContext):
     access = len(strip_list(str(connect.find_matches_where_two(data=int(message.from_user.id),
                                                                find_column_one='user_id',
                                                                find_column_two='user_password', table='admin_panel',
-                                                               where_column='user_id'))))
+                                                               where_column='user_id', flag=True))))
     if access == 2:
         await states.EnterAdmin.e.set()
         await message.answer(txt.APASSWORD_TEXT, reply_markup=nav.o_cancel_menu)
@@ -631,26 +786,31 @@ async def a_password(message: types.Message, state: FSMContext):
     elif 4 <= len(e) < 33 and e.find("'") < 0:
         login = strip_list(str(connect.find_matches_where_two(data=message.from_user.id, find_column_one='user_id',
                                                               find_column_two='user_password', table='admin_panel',
-                                                              where_column='user_id')))
+                                                              where_column='user_id', flag=True)))
         if int(login[0]) == int(message.from_user.id) and str(login[1]) == str(e):
             await state.finish()
             social_credit = str(strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id),
                                                                              find_column='social_credit',
                                                                              table='admin_panel',
-                                                                             where_column='user_id'))))
+                                                                             where_column='user_id', flag=True))))
             all_rating = strip_alist(str(connect.find_what_one(where='social_credit', table='admin_panel', flag=False)))
-            all_data = strip_report(str(connect.find_what_where(data='False', where='id', table='cards_report',
-                                                                bar='take', flag=False)))
+            all_data = strip_report(str(connect.find_matches_where_one(data=False, find_column='id',
+                                                                       table='cards_report', where_column='take',
+                                                                       flag=False)))
             await states.Apanel.a.set()
             await message.answer(f"{txt.AENTER_TEXT_P1}{social_credit}{txt.AENTER_TEXT_P2}"
                                  f"{check_place(value_list=all_rating, data=all_rating)}{txt.AENTER_TEXT_P3}",
                                  reply_markup=nav.remove_markup)
-            count = 0
             for i in all_data:
-                if count < 6:
-                    await message.answer(f"№{i}")
+                if len(all_data) == 1:
+                    await message.answer(txt.GOOD_WORK_TEXT)
                 else:
-                    break
+                    count = 0
+                    if count < 6:
+                        await message.answer(f"№{i}")
+                        count += 1
+                    else:
+                        break
         else:
             await message.answer(txt.INCORRECT_TEXT)
     else:
@@ -667,15 +827,19 @@ async def q(message: types.Message, state: FSMContext):
 @dp.message_handler(commands='reports', state=states.Apanel.a)
 async def reports(message: types.Message):
     """ Function for check all reports """
-    count = 0
     await message.answer(txt.AVAILABLE_TEXT)
-    for i in strip_report(str(connect.find_what_where(data='False', where='id', table='cards_report', bar='take',
-                                                      flag=False))):
-        if count < 6:
-            await message.answer(f"№{i}")
+    all_data = strip_report(str(connect.find_matches_where_one(data=False, find_column='id', table='cards_report',
+                                                               where_column='take', flag=False)))
+    for i in all_data:
+        if len(all_data) == 1:
+            await message.answer(txt.GOOD_WORK_TEXT)
         else:
-            break
-    count += 1
+            count = 0
+            if count < 6:
+                await message.answer(f"№{i}")
+                count += 1
+            else:
+                break
 
 
 @dp.message_handler(commands='recon', state=states.Apanel.a)
@@ -683,12 +847,13 @@ async def admin(message: types.Message, state: FSMContext):
     """ Function of report """
     m = message.text
     m = m.split(' ')
-    if len(m) == 2 and m[1].isdigit():
-        report = strip_parentheses(str(connect.find_what_where(data=m[1], where='*', table='cards_report', bar='id',
-                                                               flag=False)))
-        # Сделать проверку флага
+    if len(m) == 2 and m[1].isdigit() and str(connect.find_matches_where_one(data=m[1], find_column='take',
+                                                                             table='cards_report', where_column='id',
+                                                                             flag=True)) == '(False,)':
+        report = strip_parentheses(str(connect.find_matches_where_one(data=m[1], find_column='*', table='cards_report',
+                                                                      where_column='id', flag=True)))
         if str(report) != "['[]']":
-            await message.answer(f"""Такой репорт найден!\n
+            await message.answer(f"""Такой репорт доступен!\n
             Номер человека: {report[1].replace("'", '')}
             Номер карты человека: {report[2].replace("'", '')}
             Ссылка на ВКонтакте: {report[3].replace("'", '')}
@@ -700,22 +865,37 @@ async def admin(message: types.Message, state: FSMContext):
 /cancel - отвергнуть жалобу (Если форма заполнена неправильно и док-ва являются подделкой)""")
             update.update_where(data_what=True, data_where=m[1], table_what='take', table_where='id',
                                 table='cards_report')
-            await states.Accept.a.set()
+            update.update_where(data_what=int(message.from_user.id), data_where=m[1], table_what='admin_take',
+                                table_where='id', table='cards_report')
             await state.finish()
+            await states.Accept.a.set()
         else:
             await message.answer(txt.NOT_REPORT_TEXT)
     else:
         await message.answer(txt.NOT_REPORT_TEXT)
 
 
-# Почему-то не откликается
 @dp.message_handler(commands='accept', state=states.Accept.a)
-async def cancel_action(message: types.Message, state: FSMContext):
-    await message.answer('accepted')
+async def accept_report(message: types.Message, state: FSMContext):
+    """ Function for accepting report """
+    report = strip_parentheses(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='*',
+                                                                  table='cards_report', where_column='admin_take',
+                                                                  flag=True)))
+    add.add_all(first_data=s_none(report[1].replace("'", '')), second_data=s_none(report[2].replace("'", '')),
+                third_data=s_none(report[3].replace("'", '')), fourth_data=s_none(report[4].replace("'", '')),
+                fifth_data=s_none(report[5].replace("'", '')), sixth_data=s_none(report[9].replace("'", '')),
+                seventh_data=s_none(report[8].replace("'", '')), eighth_data=s_none(report[6].replace("'", '')),
+                first_column='tnumber', second_column='cnumber', third_column='share_vk', fourth_column='share_tg',
+                fifth_column='docers', sixth_column='address', seventh_column='admin_take', eighth_column='id',
+                table='cards_true')
+    delete.delete_where(data=int(message.from_user.id), column='admin_take', table='cards_report')
+    await message.answer('Репорт был одобрен!')
+    await state.finish()
+    await states.Apanel.a.set()
 
 
 @dp.message_handler(commands='cancel', state=states.Accept.a)
-async def cancel_action(message: types.Message, state: FSMContext):
+async def cancel_report(message: types.Message):
     await message.answer('canceled')
 
 

@@ -27,5 +27,7 @@ cancel_menu = ReplyKeyboardMarkup(resize_keyboard=True).add(btn_back, btn_cancel
 selections_menu = ReplyKeyboardMarkup(resize_keyboard=True).add(btn_add, btn_delete, btn_back)
 yesno_menu = ReplyKeyboardMarkup(resize_keyboard=True).add(btn_yes, btn_no)
 o_cancel_menu = ReplyKeyboardMarkup(resize_keyboard=True).add(btn_cancel)
+find_menu = ReplyKeyboardMarkup(resize_keyboard=True).add(btn_VK, btn_TG, btn_card, btn_address, btn_telephone,
+                                                          btn_back)
 
 remove_markup = ReplyKeyboardRemove()

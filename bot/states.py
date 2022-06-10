@@ -96,3 +96,35 @@ class SetAdmin(StatesGroup):
 
 class Accept(StatesGroup):
     a = State()
+
+
+class NotDo(StatesGroup):
+    n = State()
+
+
+class ProofNo(StatesGroup):
+    p = State()
+
+
+class FindUsers(StatesGroup):
+    f = State()
+
+
+class FindShareVK(StatesGroup):
+    f = State()
+
+
+class FindIDTG(StatesGroup):
+    f = State()
+
+
+class FindCardNumber(StatesGroup):
+    f = State()
+
+
+class FindTelephoneNumber(StatesGroup):
+    f = State()
+
+
+class FindAddress(StatesGroup):
+    f = State()

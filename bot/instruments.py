@@ -35,3 +35,20 @@ def check_place(value_list: list, data: str):
 def strip_parentheses(value: str):
     """ Function for strip parentheses """
     return value.lstrip('(').rstrip(')').split(', ')
+
+
+def s_none(value):
+    if str(value).lower() != 'none':
+        return "'" + str(value) + "'"
+    elif str(value).isdigit():
+        print(11)
+        return int(value)
+    else:
+        return 'Null'
+
+
+def c_none(value):
+    if str(value).lower() == 'none':
+        return 'Отсутствует'
+    else:
+        return value.replace("'", '')
