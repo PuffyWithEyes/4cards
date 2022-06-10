@@ -80,7 +80,7 @@ ALL_TEXT = '[INFO] The first column is the admin ID | The second is his password
 APASSWORD_TEXT = 'Введите пароль от вашего админ аккаунта:'
 CREATE_PASSWORD_TEXT = 'Создайте пароль от вашего админ аккаунта (Он должен быть не больше 32 символов и не меньше 4!):'
 ACCEPT_PASSWORD_TEXT = 'Пароль успешно записан! Запишите его! Для сброса пишите главному администратору - @tofupaw.' \
-                       '/reports - посмотреть доступные репорты'
+                       '\n/reports - посмотреть доступные репорты'
 AENTER_TEXT_P1 = 'Вы успешно авторизовались под админский аккаунт! Ваш текущий рейтинг администратора: '
 AENTER_TEXT_P2 = '. Вы на '
 AENTER_TEXT_P3 = ' месте.\n\n/recon {номер репорта} - взяться за репорт.\n/change {telephone - номер телефона|card -' \
@@ -90,7 +90,8 @@ AENTER_TEXT_P3 = ' месте.\n\n/recon {номер репорта} - взят�
 INCORRECT_TEXT = 'Пароль неверный!'
 SUDO_TEXT = '[INFO] Enter your sudo password:'
 SET_ADMIN_TEXT = "[INFO] Use following commands:\n/sudo {add|delete} {administrator ID} - add or remove administrator" \
-                 " to database\n/sudo {all} - View the entire list of administrators and all information about them"
+                 " to database\n/sudo {all} - View the entire list of administrators and all information about them\n" \
+                 "/sudo {passwd} {Admin ID} - reset admin password"
 ADD_ADMIN_TEXT = '[INFO] Administrator successfully added to database'
 DELETE_ADMIN_TEXT = '[INFO] Administrator successfully removed from database'
 DONE_TEXT = '[INFO] Done!'
@@ -112,3 +113,4 @@ CRIB = 'ВСЕГДА ПРОВЕРЯЕМ СХОДСТВА ДАННЫХ В ЖАЛ�
        'просто обновить страницу\n3. Перейдите на страницу нарушителя и обновите её\n4. Так же, продолжая это видео,' \
        ' зайдите на сайт https://time100.ru/ и обновите его на видео\n\nВидео-пример и форма подачи жалобы:\n' \
        'https://www.youtube.com/watch?v=dQw4w9WgXcQ\n\nОбязательно проверяйте видео на подлинность!'
+PASSWD_TEXT = '[INFO] The admin password has been successfully updated!'

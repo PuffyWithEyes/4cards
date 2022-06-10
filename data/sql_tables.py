@@ -314,8 +314,8 @@ CREATE TABLE IF NOT EXISTS public.cards_report
     got_id integer,
     take boolean DEFAULT false,
     admin_take integer,
-    address integer,
-    delete integer
+    delete integer,
+    address character varying(1024) COLLATE pg_catalog."default"
 )
 
 TABLESPACE pg_default;

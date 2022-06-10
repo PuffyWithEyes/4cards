@@ -854,6 +854,11 @@ async def sudo(message: types.Message, state: FSMContext):
         await message.answer(str(connect.find_what_one(where='*', table='admin_panel',
                                                        flag=False)).replace('), (', '\n'),
                              reply_markup=nav.main_menu)
+    elif len_m == 3 and m[1].lower() == 'passwd' and m[2].isdigit():
+        await state.finish()
+        update.update_where(table='admin_panel', table_what='user_password', data_what='', table_where='user_id',
+                            data_where=int(m[2]))
+        await message.answer(txt.PASSWD_TEXT)
     else:
         await state.finish()
         await message.answer(txt.ACCESS_TEXT)
@@ -867,10 +872,12 @@ async def a_panel(message: types.Message, state: FSMContext):
                                                                find_column_one='user_id',
                                                                find_column_two='user_password', table='admin_panel',
                                                                where_column='user_id', flag=True))))
-    if access == 2:
+    if access == 2 and strip_all(str(connect.find_matches_where_one(find_column='user_password', table='admin_panel',
+                                                                    where_column='user_id',
+                                                                    data=int(message.from_user.id), flag=True))):
         await states.EnterAdmin.e.set()
         await message.answer(txt.APASSWORD_TEXT, reply_markup=nav.o_cancel_menu)
-    elif access == 1:
+    elif access == 1 or access == 2:
         await states.CreateApassword.c.set()
         await message.answer(txt.CREATE_PASSWORD_TEXT, reply_markup=nav.cancel_menu)
     else:

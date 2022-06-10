@@ -143,3 +143,5 @@ cython_debug/
 .env
 
 user_data.txt
+
+/.idea/

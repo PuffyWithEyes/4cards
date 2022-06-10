@@ -40,6 +40,7 @@ def strip_parentheses(value: str):
 
 
 def s_none(value):
+    """ Function for check none """
     if str(value).lower() != 'none':
         return "'" + str(value) + "'"
     elif str(value).isdigit():
@@ -49,6 +50,7 @@ def s_none(value):
 
 
 def c_none(value):
+    """ Function for check none """
     if str(value).lower() == 'none':
         return 'Отсутствует'
     else:
@@ -56,6 +58,7 @@ def c_none(value):
 
 
 async def social_rating(message: types.Message):
+    """ Update social rating of admins """
     credit = int(strip_all(str(connect.find_matches_where_one(find_column='social_credit', table='admin_panel',
                                                               where_column='user_id', data=int(message.from_user.id),
                                                               flag=True))))
