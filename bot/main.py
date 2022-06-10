@@ -48,7 +48,7 @@ async def find_user(message: types.Message):
 async def find_user_division(message: types.Message, state: FSMContext):
     """ Function of report """
     r = message.text
-    if r == '⛓Проверить ссылку во ВКонтакте':
+    if r == 'Проверить ссылку во ВКонтакте⛓':
         await state.finish()
         await states.FindShareVK.f.set()
         await message.reply(txt.VK_TEXT, reply_markup=nav.o_cancel_menu)
@@ -63,7 +63,7 @@ async def find_user_division(message: types.Message, state: FSMContext):
         await states.FindCardNumber.f.set()
         await message.reply(txt.CARD_TEXT, reply_markup=nav.o_cancel_menu)
 
-    elif r == '📞Проверить по номеру телефона':
+    elif r == 'Проверить по номеру телефона📞':
         await state.finish()
         await states.FindTelephoneNumber.f.set()
         await message.reply(txt.TELEPHONE_TEXT, reply_markup=nav.o_cancel_menu)
@@ -108,6 +108,10 @@ async def find_share_vk(message: types.Message, state: FSMContext):
                                 f'Адрес: {c_none(all_data[6])}\n',
                                 reply_markup=nav.selections_menu)
 
+        else:
+            await state.finish()
+            await message.reply(txt.NOT_FOUND, reply_markup=nav.main_menu)
+
     else:
         await message.reply(txt.WRONG_TEXT)
 
@@ -135,6 +139,10 @@ async def find_share_tg(message: types.Message, state: FSMContext):
                                 f'ID в Telegram: {c_none(all_data[4])}\n'
                                 f'Адрес: {c_none(all_data[6])}\n',
                                 reply_markup=nav.selections_menu)
+
+        else:
+            await state.finish()
+            await message.reply(txt.NOT_FOUND, reply_markup=nav.main_menu)
 
     else:
         await message.reply(txt.WRONG_TEXT)
@@ -164,6 +172,10 @@ async def find_card(message: types.Message, state: FSMContext):
                                 f'Адрес: {c_none(all_data[6])}\n',
                                 reply_markup=nav.selections_menu)
 
+        else:
+            await state.finish()
+            await message.reply(txt.NOT_FOUND, reply_markup=nav.main_menu)
+
     else:
         await message.reply(txt.WRONG_TEXT)
 
@@ -192,6 +204,10 @@ async def find_telephone(message: types.Message, state: FSMContext):
                                 f'Адрес: {c_none(all_data[6])}\n',
                                 reply_markup=nav.selections_menu)
 
+        else:
+            await state.finish()
+            await message.reply(txt.NOT_FOUND, reply_markup=nav.main_menu)
+
     else:
         await message.reply(txt.WRONG_TEXT)
 
@@ -204,7 +220,7 @@ async def find_address(message: types.Message, state: FSMContext):
         await state.finish()
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
 
-    elif f.find("'") < 0 and f.find(' ') < 0:
+    elif f.find("'") < 0 and f.find(' ') < 0 and 16 < len(f) < 1025 and f.find(',') < 0:
         matches = connect.find_matches(mean=f, column='address')
 
         if matches[0]:
@@ -220,18 +236,22 @@ async def find_address(message: types.Message, state: FSMContext):
                                 f'Адрес: {c_none(all_data[6])}\n',
                                 reply_markup=nav.selections_menu)
 
+        else:
+            await state.finish()
+            await message.reply(txt.NOT_FOUND, reply_markup=nav.main_menu)
+
     else:
         await message.reply(txt.WRONG_TEXT)
 
 
-@dp.message_handler(Text(equals='➕Подать жалобу на внесение в ЧС'))
+@dp.message_handler(Text(equals='Подать жалобу на внесение в ЧС➕'))
 async def add_user(message: types.Message):
     """ Function for add user in black list """
     await states.DoReport.r.set()
     await message.answer(txt.ADD_TEXT, reply_markup=nav.report_menu)
 
 
-@dp.message_handler(Text(equals='➖Подать жалобу на удаление из ЧС'))
+@dp.message_handler(Text(equals='Подать жалобу на удаление из ЧС➖'))
 async def delete_user(message: types.Message):
     """ Function for delete user from black list """
     await states.NotDo.n.set()
@@ -253,7 +273,7 @@ async def delete_user(message: types.Message, state: FSMContext):
 async def do_report(message: types.Message, state: FSMContext):
     """ Function of report """
     r = message.text
-    if r == '⛓Проверить ссылку во ВКонтакте':
+    if r == 'Проверить ссылку во ВКонтакте⛓':
         await state.finish()
         await states.ReportShareVK.s.set()
         await message.reply(txt.VK_TEXT, reply_markup=nav.cancel_menu)
@@ -268,7 +288,7 @@ async def do_report(message: types.Message, state: FSMContext):
         await states.CardNumber.c.set()
         await message.reply(txt.CARD_TEXT, reply_markup=nav.cancel_menu)
 
-    elif r == '📞Проверить по номеру телефона':
+    elif r == 'Проверить по номеру телефона📞':
         await state.finish()
         await states.TelephoneNumber.t.set()
         await message.reply(txt.TELEPHONE_TEXT, reply_markup=nav.cancel_menu)
@@ -278,7 +298,7 @@ async def do_report(message: types.Message, state: FSMContext):
         await states.Address.a.set()
         await message.reply(txt.ADDRESS_TEXT, reply_markup=nav.cancel_menu)
 
-    elif r == '🧾У меня есть ID мошенника из базы данных':
+    elif r == 'У меня есть ID мошенника из базы данных🧾':
         await state.finish()
         await states.ID.i.set()
         await message.reply(txt.ID_TEXT, reply_markup=nav.cancel_menu)
@@ -697,8 +717,87 @@ async def add_docs_card(message: types.Message, state: FSMContext):
 @dp.message_handler(state=states.Address.a)
 async def check_address(message: types.Message, state: FSMContext):
     """ This function ask user swindler's house """
-    await message.answer('В разработке')
-    await state.finish()
+    a = message.text
+    a = a.replace('—', '-').replace('–', '-').replace('−', '-').replace('-', '-').lower()
+    if a == '❌Отменить действие':
+        await state.finish()
+        delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
+        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.main_menu)
+
+    elif 16 < len(a) < 1025 and a.find(',') < 0 and a.count('|') == 4 and a.find("'") < 0:
+        matches = connect.find_matches(mean=a, column='address')
+
+        if matches[0]:
+            await state.finish()
+            all_data = strip_parentheses(str(connect.find_matches_where_one(data=a, find_column='*', table='cards_true',
+                                                                            where_column='address', flag=True)))
+            await message.reply(f'{txt.USER_FIND_TEXT_P1} {strip_all(str(matches[1]))}'
+                                f'{txt.USER_FIND_TEXT_P2}\n\nОстальные данные этого мошенника:\n'
+                                f'Номер телефона: {c_none(all_data[1])}\n'
+                                f'Номер карты: {c_none(all_data[2])}\n'
+                                f'Ссылка во ВКонтакте: {c_none(all_data[3])}\n'
+                                f'ID в Telegram: {c_none(all_data[4])}\n'
+                                f'Адрес: {c_none(all_data[6])}\n',
+                                reply_markup=nav.selections_menu)
+
+        else:
+            await state.finish()
+            delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
+            add.add_two(first_value=int(message.from_user.id), second_value=a, first_column='user_id',
+                        second_column='message', table='messages')
+            await states.YesNoAddress.y.set()
+            await message.reply(txt.USER_NFIND_TEXT, reply_markup=nav.yesno_menu)
+
+    else:
+        await message.reply(txt.WRONG_TEXT)
+
+
+@dp.message_handler(state=states.YesNoAddress.y)
+async def yes_no_address(message: types.Message, state: FSMContext):
+    """ Function for ask about docs """
+    y = message.text
+    if y == '👍Да':
+        await state.finish()
+        await states.DoReport.r.set()
+        delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
+        await message.answer(txt.YES_TEXT, reply_markup=nav.report_menu)
+
+    elif y == '👎Нет':
+        await state.finish()
+        await states.NoAddress.n.set()
+        await message.answer(txt.DOC_TEXT, reply_markup=nav.o_cancel_menu)
+
+    elif y == '❌Отменить действие':
+        await state.finish()
+        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
+
+    else:
+        await message.reply(txt.WRONG_TEXT)
+
+
+@dp.message_handler(state=states.NoAddress.n)
+async def add_docs_address(message: types.Message, state: FSMContext):
+    """ This function add proofs in database """
+    n = message.text
+    if n == '❌Отменить действие':
+        await state.finish()
+        delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
+        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.main_menu)
+
+    elif 22 < len(n) < 256 and (n[0:24] == txt.YOUTUBE_C or n[0:23] == txt.YOUTUBE_CN or n[0:22] == txt.YOUTUBE_CM or
+                                n[0:21] == txt.YOUTUBE_CMN or n[0:17] == txt.YOUTUBE_BEC or n[0:16] == txt.YOUTUBE_BECN
+                                or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN) and n.find("'") < 0 \
+            and n.find(' ') < 0:
+        await state.finish()
+        data = strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='message',
+                                                            table='messages', where_column='user_id', flag=True)))
+        add.add_two(first_value=n, second_value=data, first_column='docers',
+                    second_column='address', table='cards_report')
+        delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
+        await message.answer(txt.DOCS_TEXT, reply_markup=nav.main_menu)
+
+    else:
+        await message.reply(txt.WRONG_TEXT)
 
 
 @dp.message_handler(commands='ahelp')
@@ -712,11 +811,12 @@ async def a_help(message: types.Message):
 
 
 @dp.message_handler(commands='sudo')
-async def set_admin(message: types.Message):
+async def set_admin(message: types.Message, state: FSMContext):
     """ Function for set admins in database """
+    await state.reset_state()
     if int(message.from_user.id) == int(RED_ADMIN):
         await states.SetAdminPassword.s.set()
-        await message.answer(txt.SUDO_TEXT)
+        await message.answer(txt.SUDO_TEXT, reply_markup=nav.remove_markup)
     else:
         await message.answer(txt.ACCESS_TEXT)
 
@@ -725,21 +825,38 @@ async def set_admin(message: types.Message):
 async def enter_admin_password(message: types.Message, state: FSMContext):
     """ Function for sudo admin """
     s = message.text
-    if int(s) == int(RED_ADMIN_PASSWORD):
-        await states.SetAdmin.s.set()
+    if str(s) == str(RED_ADMIN_PASSWORD):
+        await state.finish()
+        await states.Sudo.s.set()
         await message.answer(txt.SET_ADMIN_TEXT)
     else:
         await state.finish()
         await message.answer(txt.ACCESS_TEXT)
 
 
-@dp.message_handler(state=states.SetAdmin.s)
-async def create_admin(message: types.Message, state: FSMContext):
+@dp.message_handler(commands='sudo', state=states.Sudo.s)
+async def sudo(message: types.Message, state: FSMContext):
     """ Function for sudo admin """
-    s = message.text
-    add.add_info(value=s, column='user_id', table='admin_panel')
-    await state.finish()
-    await message.answer(txt.DONE_TEXT)
+    m = message.text
+    m = m.split(' ')
+    len_m = len(m)
+    if len_m == 3 and m[1].lower() == 'add' and m[2].isdigit():
+        add.add_info(table='admin_panel', column='user_id', value=int(m[2]))
+        await state.finish()
+        await message.answer(txt.ADD_ADMIN_TEXT, reply_markup=nav.main_menu)
+    elif len_m == 3 and m[1].lower() == 'delete' and m[2].isdigit():
+        delete.delete_where(table='admin_panel', column='user_id', data=int(m[2]))
+        await state.finish()
+        await message.answer(txt.DELETE_ADMIN_TEXT, reply_markup=nav.main_menu)
+    elif len_m == 2 and m[1].lower() == 'all':
+        await state.finish()
+        await message.answer(txt.ALL_TEXT)
+        await message.answer(str(connect.find_what_one(where='*', table='admin_panel',
+                                                       flag=False)).replace('), (', '\n'),
+                             reply_markup=nav.main_menu)
+    else:
+        await state.finish()
+        await message.answer(txt.ACCESS_TEXT)
 
 
 @dp.message_handler(commands='apanel')
@@ -803,7 +920,7 @@ async def a_password(message: types.Message, state: FSMContext):
                                  f"{check_place(value_list=all_rating, data=all_rating)}{txt.AENTER_TEXT_P3}",
                                  reply_markup=nav.remove_markup)
             for i in all_data:
-                if len(all_data) == (0 or 1):
+                if len(all_data) == 0:
                     await message.answer(txt.GOOD_WORK_TEXT)
                 else:
                     count = 0
@@ -832,7 +949,7 @@ async def reports(message: types.Message):
     all_data = strip_report(str(connect.find_matches_where_one(data=False, find_column='id', table='cards_report',
                                                                where_column='take', flag=False)))
     for i in all_data:
-        if len(all_data) == (0 or 1):
+        if len(all_data) == 0:
             await message.answer(txt.GOOD_WORK_TEXT)
         else:
             count = 0
@@ -855,15 +972,17 @@ async def admin(message: types.Message, state: FSMContext):
                                                                       where_column='id', flag=True)))
         if str(report) != "['[]']":
             await message.answer(f"""Такой репорт доступен!\n
-            Номер человека: {report[1].replace("'", '')}
+            Номер телефона человека: {report[1].replace("'", '')}
             Номер карты человека: {report[2].replace("'", '')}
             Ссылка на ВКонтакте: {report[3].replace("'", '')}
             ID в Telegram: {report[4].replace("'", '')}
             Имеющийся ID в БАЗЕ ДАННЫХ: {report[6].replace("'", '')}
+            Адрес человека: {report[10].replace("'", '')}
             \nДоказательства (ПЕРЕХОДИТЕ ТОЛЬКО ПО ЮТУБ ССЫЛКАМ, ЭТО СДЕЛАНО ДЛЯ ВАШЕЙ БЕЗОПАСНОСТИ!): 
         {report[5].replace("'", '')}\n
 /accept - принять жалобу (Если форма заполнена правильно и док-ва не являются подделкой)
-/cancel - отвергнуть жалобу (Если форма заполнена неправильно и док-ва являются подделкой)""")
+/cancel - отвергнуть жалобу (Если форма заполнена неправильно и док-ва являются подделкой)
+/acrib - шпаргалка по заполнению пунктов""")
             update.update_where(data_what=True, data_where=m[1], table_what='take', table_where='id',
                                 table='cards_report')
             update.update_where(data_what=int(message.from_user.id), data_where=m[1], table_what='admin_take',
@@ -884,7 +1003,7 @@ async def accept_report(message: types.Message, state: FSMContext):
                                                                   flag=True)))
     add.add_all(first_data=s_none(report[1].replace("'", '')), second_data=s_none(report[2].replace("'", '')),
                 third_data=s_none(report[3].replace("'", '')), fourth_data=s_none(report[4].replace("'", '')),
-                fifth_data=s_none(report[5].replace("'", '')), sixth_data=s_none(report[9].replace("'", '')),
+                fifth_data=s_none(report[5].replace("'", '')), sixth_data=s_none(report[10].replace("'", '')),
                 seventh_data=s_none(report[8].replace("'", '')),
                 first_column='tnumber', second_column='cnumber', third_column='share_vk', fourth_column='share_tg',
                 fifth_column='docers', sixth_column='address', seventh_column='admin_take', table='cards_true')
@@ -897,6 +1016,7 @@ async def accept_report(message: types.Message, state: FSMContext):
 
 @dp.message_handler(commands='cancel', state=states.Accept.a)
 async def cancel_report(message: types.Message, state: FSMContext):
+    """ Function for cancel report """
     await state.finish()
     await states.Apanel.a.set()
     delete.delete_where(table='cards_report', column='admin_take', data=int(message.from_user.id))
@@ -906,6 +1026,7 @@ async def cancel_report(message: types.Message, state: FSMContext):
 
 @dp.message_handler(commands='change', state=states.Accept.a)
 async def change_report(message: types.Message):
+    """ Function for change data of report """
     a = message.text
     a = a.split(' ')
     len_a = len(a)
@@ -937,6 +1058,12 @@ async def change_report(message: types.Message):
         await message.answer(txt.UPDATE_TEXT)
     else:
         await message.answer(txt.WRONG_TEXT)
+
+
+@dp.message_handler(commands='acrib', state=states.Accept.a)
+async def change_report(message: types.Message):
+    """ Crib for admins """
+    await message.answer(txt.CRIB)
 
 
 @dp.message_handler(Text(equals='❌Отменить действие'))

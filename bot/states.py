@@ -90,7 +90,7 @@ class SetAdminPassword(StatesGroup):
     s = State()
 
 
-class SetAdmin(StatesGroup):
+class Sudo(StatesGroup):
     s = State()
 
 
@@ -128,3 +128,11 @@ class FindTelephoneNumber(StatesGroup):
 
 class FindAddress(StatesGroup):
     f = State()
+
+
+class YesNoAddress(StatesGroup):
+    y = State()
+
+
+class NoAddress(StatesGroup):
+    n = State()
