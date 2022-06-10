@@ -1,4 +1,6 @@
 """ Refactor data """
+from con_db.actions_db import UpdateInfo, FindUser
+from aiogram import types
 
 
 def strip_all(value: str):
@@ -41,7 +43,6 @@ def s_none(value):
     if str(value).lower() != 'none':
         return "'" + str(value) + "'"
     elif str(value).isdigit():
-        print(11)
         return int(value)
     else:
         return 'Null'
@@ -52,3 +53,15 @@ def c_none(value):
         return 'Отсутствует'
     else:
         return value.replace("'", '')
+
+
+async def social_rating(message: types.Message):
+    credit = int(strip_all(str(connect.find_matches_where_one(find_column='social_credit', table='admin_panel',
+                                                              where_column='user_id', data=int(message.from_user.id),
+                                                              flag=True))))
+    update.update_where(table='admin_panel', table_what='social_credit', data_what=(credit + 1), table_where='user_id',
+                        data_where=int(message.from_user.id))
+
+
+connect = FindUser()
+update = UpdateInfo()

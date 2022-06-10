@@ -100,15 +100,15 @@ class AddUser(Connect):
         self._close_connection()
 
     def add_all(self, first_data, second_data, third_data, fourth_data, fifth_data, sixth_data, seventh_data,
-                eighth_data, table: str, first_column: str, second_column: str, third_column: str, fourth_column: str,
-                fifth_column: str, sixth_column: str, seventh_column: str, eighth_column: str):
+                table: str, first_column: str, second_column: str, third_column: str, fourth_column: str,
+                fifth_column: str, sixth_column: str, seventh_column: str):
         """ Insert all data """
         self._connect()
         with self.connection.cursor() as cursor:
             cursor.execute(
                 f"""INSERT INTO {table} ({first_column}, {second_column}, {third_column}, {fourth_column}, 
-{fifth_column}, {sixth_column}, {seventh_column}, {eighth_column}) VALUES ({first_data}, {second_data}, 
-{third_data}, {fourth_data}, {fifth_data}, {sixth_data}, {seventh_data}, {eighth_data});"""
+{fifth_column}, {sixth_column}, {seventh_column}) VALUES ({first_data}, {second_data}, 
+{third_data}, {fourth_data}, {fifth_data}, {sixth_data}, {seventh_data});"""
             )
 
         self._close_connection()

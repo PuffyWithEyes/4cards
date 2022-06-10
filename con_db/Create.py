@@ -16,7 +16,7 @@ class Create(Connect):
             self._ask_data(text=txt.QUESTION_TEXT, data_len=4)
             self._ask_data(text=txt.ANSWER_TEXT, data_len=1)
 
-            # self._create_all_tables()
+            self._create_all_tables()
         elif reader.count('\n') == 3:
             if input(txt.DROP_TABLES_TEXT).lower() == 'i fully agree to the deletion of all my tables and the data ' \
                                                       'within them':
@@ -40,7 +40,7 @@ class Create(Connect):
                             count_1 -= 1
                         print('0')
 
-                        # self._delete_all_tables()
+                        self._delete_all_tables()
                         print('[INFO] Tables were deleted successfully!')
                         exit(0)
 
@@ -70,13 +70,38 @@ class Create(Connect):
         self._connect()
         with self.connection.cursor() as cursor:
             try:
-                cursor.execute(sql.DATABASE)
+                cursor.execute(sql.TABLESPACE_PG_GLOBAL)
+                cursor.execute(sql.TABLESPACE_PG_DEFAULT)
+                cursor.execute(sql.SEQUENCE_VK_ID_SEQ)
+                cursor.execute(sql.SEQUENCE_VK_ID_SEQ)
+                cursor.execute(sql.SCHEMA_PUBLIC)
+                cursor.execute(sql.LOGIN_WRITE_SERVER_FILES)
+                cursor.execute(sql.LOGIN_WRITE_ALL_DATA)
+                cursor.execute(sql.LOGIN_WRITE_ALL_DATA)
+                cursor.execute(sql.LOGIN_PUFFY)
+                cursor.execute(sql.LOGIN_POSTGRES)
+                cursor.execute(sql.TABLE_MESSAGES)
+                cursor.execute(sql.TABLE_CARDS_REPORT)
+                cursor.execute(sql.LOGIN_PG_STAT_SCAN_TABLES)
+                cursor.execute(sql.LOGIN_PG_SIGNAL_BACKEND)
+                cursor.execute(sql.LOGIN_PG_READ_SERVER_FILES)
+                cursor.execute(sql.LOGIN_PG_READ_ALL_STATS)
+                cursor.execute(sql.LOGIN_PG_READ_ALL_SETTINGS)
+                cursor.execute(sql.LOGIN_PG_READ_ALL_DATA)
+                cursor.execute(sql.LOGIN_PG_MONITOR)
+                cursor.execute(sql.LOGIN_PG_EXECUTE_SERVER_PROGRAM)
+                cursor.execute(sql.LOGIN_PG_DATABASE_OWNER)
+                cursor.execute(sql.LOGIN_CARDS)
+                cursor.execute(sql.LANGUAGE_PLGSQL)
+                cursor.execute(sql.EXTENSION_PLPGSQL)
+                cursor.execute(sql.DATABASE_CARDS)
+
+                cursor.execute(sql.TABLE_ADMIN_PANEL)
+                cursor.execute(sql.TABLE_MESSAGES)
+                cursor.execute(sql.TABLE_CARDS_TRUE)
+                cursor.execute(sql.TABLE_CARDS_REPORT)
             except Exception as ex:
                 print('[INFO] Most likely the database already exists, or something is broken.\nThe code: ', ex)
-            cursor.execute(sql.ADMIN_PANEL)
-            cursor.execute(sql.MESSAGES)
-            cursor.execute(sql.CARDS_TRUE)
-            cursor.execute(sql.CARDS_REPORT)
 
         self._close_connection()
 

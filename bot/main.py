@@ -8,7 +8,7 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from con_db.actions_db import FindUser, AddUser, DeleteInfo, UpdateInfo
 import states
 import data.text as txt
-from instruments import strip_all, strip_list, check_place, strip_alist, strip_report, s_none, c_none
+from instruments import strip_all, strip_list, check_place, strip_alist, strip_report, s_none, c_none, social_rating
 from con_db.ClearMessages import ClearMessages
 from con_db.Create import Create
 from bot.instruments import strip_parentheses
@@ -88,6 +88,7 @@ async def find_share_vk(message: types.Message, state: FSMContext):
     f = message.text
     if f == '❌Отменить действие':
         await state.finish()
+
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
 
     elif 15 < len(f) < 129 and (f[0:17] == txt.VK_CM or f[0:16] == txt.VK_CMN or f[0:15] == txt.VK_C or f[0:14] ==
@@ -108,7 +109,7 @@ async def find_share_vk(message: types.Message, state: FSMContext):
                                 reply_markup=nav.selections_menu)
 
     else:
-        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+        await message.reply(txt.WRONG_TEXT)
 
 
 @dp.message_handler(state=states.FindIDTG.f)
@@ -119,7 +120,7 @@ async def find_share_tg(message: types.Message, state: FSMContext):
         await state.finish()
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
 
-    elif len(f) < 65 and f.find("'") < 0 and f.find(' ') < 0:
+    elif len(f) < 65 and f.find("'") < 0 and f.find(' ') < 0 and f[0] != '@':
         matches = connect.find_matches(mean=f, column='share_tg')
 
         if matches[0]:
@@ -136,7 +137,7 @@ async def find_share_tg(message: types.Message, state: FSMContext):
                                 reply_markup=nav.selections_menu)
 
     else:
-        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+        await message.reply(txt.WRONG_TEXT)
 
 
 @dp.message_handler(state=states.FindCardNumber.f)
@@ -164,10 +165,10 @@ async def find_card(message: types.Message, state: FSMContext):
                                 reply_markup=nav.selections_menu)
 
     else:
-        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+        await message.reply(txt.WRONG_TEXT)
 
 
-@dp.message_handler(state=states.FindCardNumber.f)
+@dp.message_handler(state=states.FindTelephoneNumber.f)
 async def find_telephone(message: types.Message, state: FSMContext):
     """ Function for check user's telephone number's share """
     f = message.text
@@ -192,10 +193,10 @@ async def find_telephone(message: types.Message, state: FSMContext):
                                 reply_markup=nav.selections_menu)
 
     else:
-        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+        await message.reply(txt.WRONG_TEXT)
 
 
-@dp.message_handler(state=states.FindCardNumber.f)
+@dp.message_handler(state=states.FindAddress.f)
 async def find_address(message: types.Message, state: FSMContext):
     """ Function for check user's address's share """
     f = message.text
@@ -220,7 +221,7 @@ async def find_address(message: types.Message, state: FSMContext):
                                 reply_markup=nav.selections_menu)
 
     else:
-        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+        await message.reply(txt.WRONG_TEXT)
 
 
 @dp.message_handler(Text(equals='➕Подать жалобу на внесение в ЧС'))
@@ -328,7 +329,7 @@ async def check_vk(message: types.Message, state: FSMContext):
             await message.reply(txt.USER_NFIND_TEXT, reply_markup=nav.yesno_menu)
 
     else:
-        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+        await message.reply(txt.WRONG_TEXT)
 
 
 @dp.message_handler(state=states.YesNoVK.y)
@@ -351,7 +352,7 @@ async def ask_info_vk(message: types.Message, state: FSMContext):
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
 
     else:
-        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+        await message.reply(txt.WRONG_TEXT)
 
 
 @dp.message_handler(state=states.NoVK.n)
@@ -376,7 +377,7 @@ async def add_docs_vk(message: types.Message, state: FSMContext):
         await message.answer(txt.DOCS_TEXT, reply_markup=nav.main_menu)
 
     else:
-        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+        await message.reply(txt.WRONG_TEXT)
 
 
 @dp.message_handler(state=states.ReportIDTG.i)
@@ -391,7 +392,7 @@ async def check_tg(message: types.Message, state: FSMContext):
         await state.finish()
         await message.answer(txt.BACK_TEXT, reply_markup=nav.selections_menu)
 
-    elif len(i) < 65 and i.find("'") < 0 and i.find(' ') < 0:
+    elif len(i) < 65 and i.find("'") < 0 and i.find(' ') < 0 and i[0] != '@':
         matches = connect.find_matches(mean=i, column='share_tg')
 
         if matches[0]:
@@ -415,7 +416,7 @@ async def check_tg(message: types.Message, state: FSMContext):
             await message.reply(txt.USER_NFIND_TEXT, reply_markup=nav.yesno_menu)
 
     else:
-        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+        await message.reply(txt.WRONG_TEXT)
 
 
 @dp.message_handler(state=states.YesNoTG.y)
@@ -438,7 +439,7 @@ async def add_info_tg(message: types.Message, state: FSMContext):
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
 
     else:
-        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+        await message.reply(txt.WRONG_TEXT)
 
 
 @dp.message_handler(state=states.NoTG.n)
@@ -463,7 +464,7 @@ async def add_docs_tg(message: types.Message, state: FSMContext):
         await message.answer(txt.DOCS_TEXT, reply_markup=nav.main_menu)
 
     else:
-        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+        await message.reply(txt.WRONG_TEXT)
 
 
 @dp.message_handler(state=states.CardNumber.c)
@@ -502,7 +503,7 @@ async def check_card(message: types.Message, state: FSMContext):
             await message.reply(txt.USER_NFIND_TEXT, reply_markup=nav.yesno_menu)
 
     else:
-        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+        await message.reply(txt.WRONG_TEXT)
 
 
 @dp.message_handler(state=states.YesNoCard.y)
@@ -525,7 +526,7 @@ async def add_info_card(message: types.Message, state: FSMContext):
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
 
     else:
-        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+        await message.reply(txt.WRONG_TEXT)
 
 
 @dp.message_handler(state=states.NoCard.n)
@@ -550,7 +551,7 @@ async def add_docs_card(message: types.Message, state: FSMContext):
         await message.answer(txt.DOCS_TEXT, reply_markup=nav.main_menu)
 
     else:
-        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+        await message.reply(txt.WRONG_TEXT)
 
 
 @dp.message_handler(state=states.TelephoneNumber.t)
@@ -589,7 +590,7 @@ async def check_telephone(message: types.Message, state: FSMContext):
             await message.reply(txt.USER_NFIND_TEXT, reply_markup=nav.yesno_menu)
 
     else:
-        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+        await message.reply(txt.WRONG_TEXT)
 
 
 @dp.message_handler(state=states.YesNoTelephone.y)
@@ -612,7 +613,7 @@ async def add_info_telephone(message: types.Message, state: FSMContext):
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
 
     else:
-        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+        await message.reply(txt.WRONG_TEXT)
 
 
 @dp.message_handler(state=states.NoTelephone.n)
@@ -637,7 +638,7 @@ async def add_docs_telephone(message: types.Message, state: FSMContext):
         await message.answer(txt.DOCS_TEXT, reply_markup=nav.main_menu)
 
     else:
-        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+        await message.reply(txt.WRONG_TEXT)
 
 
 @dp.message_handler(state=states.ID.i)
@@ -665,7 +666,7 @@ async def ask_id(message: types.Message, state: FSMContext):
             await message.reply(txt.NO_ID, reply_markup=nav.o_cancel_menu)
 
     else:
-        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+        await message.reply(txt.WRONG_TEXT)
 
 
 @dp.message_handler(state=states.DocsCard.d)
@@ -690,7 +691,7 @@ async def add_docs_card(message: types.Message, state: FSMContext):
         await message.answer(txt.DOCS_TEXT, reply_markup=nav.main_menu)
 
     else:
-        await message.reply(txt.WRONG_TEXT, reply_markup=nav.o_cancel_menu)
+        await message.reply(txt.WRONG_TEXT)
 
 
 @dp.message_handler(state=states.Address.a)
@@ -707,7 +708,7 @@ async def a_help(message: types.Message):
                                       where_column='user_id', flag=True):
         await message.answer(txt.ADMIN_HELP_TEXT, reply_markup=nav.main_menu)
     else:
-        await message.answer(txt.ACCESS_TEXT, reply_markup=nav.main_menu)
+        await message.answer(txt.ACCESS_TEXT)
 
 
 @dp.message_handler(commands='sudo')
@@ -802,7 +803,7 @@ async def a_password(message: types.Message, state: FSMContext):
                                  f"{check_place(value_list=all_rating, data=all_rating)}{txt.AENTER_TEXT_P3}",
                                  reply_markup=nav.remove_markup)
             for i in all_data:
-                if len(all_data) == 1:
+                if len(all_data) == (0 or 1):
                     await message.answer(txt.GOOD_WORK_TEXT)
                 else:
                     count = 0
@@ -821,7 +822,7 @@ async def a_password(message: types.Message, state: FSMContext):
 async def q(message: types.Message, state: FSMContext):
     """ Function for quit from admin's account """
     await state.finish()
-    await message.answer('Вы прекратили админиситрирование')
+    await message.answer('Вы прекратили администрирование!', reply_markup=nav.main_menu)
 
 
 @dp.message_handler(commands='reports', state=states.Apanel.a)
@@ -831,7 +832,7 @@ async def reports(message: types.Message):
     all_data = strip_report(str(connect.find_matches_where_one(data=False, find_column='id', table='cards_report',
                                                                where_column='take', flag=False)))
     for i in all_data:
-        if len(all_data) == 1:
+        if len(all_data) == (0 or 1):
             await message.answer(txt.GOOD_WORK_TEXT)
         else:
             count = 0
@@ -884,19 +885,58 @@ async def accept_report(message: types.Message, state: FSMContext):
     add.add_all(first_data=s_none(report[1].replace("'", '')), second_data=s_none(report[2].replace("'", '')),
                 third_data=s_none(report[3].replace("'", '')), fourth_data=s_none(report[4].replace("'", '')),
                 fifth_data=s_none(report[5].replace("'", '')), sixth_data=s_none(report[9].replace("'", '')),
-                seventh_data=s_none(report[8].replace("'", '')), eighth_data=s_none(report[6].replace("'", '')),
+                seventh_data=s_none(report[8].replace("'", '')),
                 first_column='tnumber', second_column='cnumber', third_column='share_vk', fourth_column='share_tg',
-                fifth_column='docers', sixth_column='address', seventh_column='admin_take', eighth_column='id',
-                table='cards_true')
+                fifth_column='docers', sixth_column='address', seventh_column='admin_take', table='cards_true')
     delete.delete_where(data=int(message.from_user.id), column='admin_take', table='cards_report')
-    await message.answer('Репорт был одобрен!')
+    await social_rating(message)
     await state.finish()
     await states.Apanel.a.set()
+    await message.answer('Репорт был одобрен!')
 
 
 @dp.message_handler(commands='cancel', state=states.Accept.a)
-async def cancel_report(message: types.Message):
-    await message.answer('canceled')
+async def cancel_report(message: types.Message, state: FSMContext):
+    await state.finish()
+    await states.Apanel.a.set()
+    delete.delete_where(table='cards_report', column='admin_take', data=int(message.from_user.id))
+    await social_rating(message)
+    await message.answer('Репорт был отклонён!')
+
+
+@dp.message_handler(commands='change', state=states.Accept.a)
+async def change_report(message: types.Message):
+    a = message.text
+    a = a.split(' ')
+    len_a = len(a)
+    if len_a == 3 and a[1].lower() == 'telephone' and a[2].find(',') < 0 and a[2][0] == '+':
+        update.update_where(table='cards_report', table_what='tnumber', data_what=a[2], table_where='admin_take',
+                            data_where=int(message.from_user.id))
+        await message.answer(txt.UPDATE_TEXT)
+
+    elif len_a == 3 and a[1].lower() == 'card' and a[2].find(',') < 0 and len(a[2]) < 14:
+        update.update_where(table='cards_report', table_what='cnumber', data_what=a[2], table_where='admin_take',
+                            data_where=int(message.from_user.id))
+        await message.answer(txt.UPDATE_TEXT)
+
+    elif len_a == 3 and a[1].lower() == 'vk' and a[2].find(',') < 0 and (a[0:17] == txt.VK_CM or a[0:16] == txt.VK_CMN
+                                                                         or a[0:15] == txt.VK_C or
+                                                                         a[0:14] == txt.VK_CN):
+        update.update_where(table='cards_report', table_what='share_vk', data_what=a[2], table_where='admin_take',
+                            data_where=int(message.from_user.id))
+        await message.answer(txt.UPDATE_TEXT)
+
+    elif len_a == 3 and a[1].lower() == 'tg' and a[2].find(',') < 0 and a[2][0] != '@':
+        update.update_where(table='cards_report', table_what='share_tg', data_what=a[2], table_where='admin_take',
+                            data_where=int(message.from_user.id))
+        await message.answer(txt.UPDATE_TEXT)
+
+    elif len_a == 3 and a[1].lower() == 'id' and a[2].find(',') < 0 and a[2].isdigit():
+        update.update_where(table='cards_report', table_what='got_id', data_what=a[2], table_where='admin_take',
+                            data_where=int(message.from_user.id))
+        await message.answer(txt.UPDATE_TEXT)
+    else:
+        await message.answer(txt.WRONG_TEXT)
 
 
 @dp.message_handler(Text(equals='❌Отменить действие'))
