@@ -386,8 +386,9 @@ async def add_docs_vk(message: types.Message, state: FSMContext):
 
     elif 22 < len(n) < 256 and (n[0:24] == txt.YOUTUBE_C or n[0:23] == txt.YOUTUBE_CN or n[0:22] == txt.YOUTUBE_CM or
                                 n[0:21] == txt.YOUTUBE_CMN or n[0:17] == txt.YOUTUBE_BEC or n[0:16] == txt.YOUTUBE_BECN
-                                or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN) and n.find("'") < 0 \
-            and n.find(' ') < 0:
+                                or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN or n[0:20] ==
+                                txt.YOUTUBE_NW or n[0:19] == txt.YOUTUBE_NNW or n[0:22] == txt.YOUTUBE_NWM or n[0:21]
+                                == txt.YOUTUBE_NNWM) and n.find("'") < 0 and n.find(' ') < 0:
         await state.finish()
         data = strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='message',
                                                             table='messages', where_column='user_id', flag=True)))
@@ -473,8 +474,9 @@ async def add_docs_tg(message: types.Message, state: FSMContext):
 
     elif 22 < len(n) < 256 and (n[0:24] == txt.YOUTUBE_C or n[0:23] == txt.YOUTUBE_CN or n[0:22] == txt.YOUTUBE_CM or
                                 n[0:21] == txt.YOUTUBE_CMN or n[0:17] == txt.YOUTUBE_BEC or n[0:16] == txt.YOUTUBE_BECN
-                                or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN) and n.find("'") < 0\
-            and n.find(' ') < 0:
+                                or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN or n[0:20] ==
+                                txt.YOUTUBE_NW or n[0:19] == txt.YOUTUBE_NNW or n[0:22] == txt.YOUTUBE_NWM or n[0:21]
+                                == txt.YOUTUBE_NNWM) and n.find("'") < 0 and n.find(' ') < 0:
         await state.finish()
         data = strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='message',
                                                             table='messages', where_column='user_id', flag=True)))
@@ -560,8 +562,9 @@ async def add_docs_card(message: types.Message, state: FSMContext):
 
     elif 22 < len(n) < 256 and (n[0:24] == txt.YOUTUBE_C or n[0:23] == txt.YOUTUBE_CN or n[0:22] == txt.YOUTUBE_CM or
                                 n[0:21] == txt.YOUTUBE_CMN or n[0:17] == txt.YOUTUBE_BEC or n[0:16] == txt.YOUTUBE_BECN
-                                or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN) and n.find("'") < 0 \
-            and n.find(' ') < 0:
+                                or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN or n[0:20] ==
+                                txt.YOUTUBE_NW or n[0:19] == txt.YOUTUBE_NNW or n[0:22] == txt.YOUTUBE_NWM or n[0:21]
+                                == txt.YOUTUBE_NNWM) and n.find("'") < 0 and n.find(' ') < 0:
         await state.finish()
         data = strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='message',
                                                             table='messages', where_column='user_id', flag=True)))
@@ -647,8 +650,9 @@ async def add_docs_telephone(message: types.Message, state: FSMContext):
 
     elif 22 < len(n) < 256 and (n[0:24] == txt.YOUTUBE_C or n[0:23] == txt.YOUTUBE_CN or n[0:22] == txt.YOUTUBE_CM or
                                 n[0:21] == txt.YOUTUBE_CMN or n[0:17] == txt.YOUTUBE_BEC or n[0:16] == txt.YOUTUBE_BECN
-                                or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN) and n.find("'") < 0 \
-            and n.find(' ') < 0:
+                                or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN or n[0:20] ==
+                                txt.YOUTUBE_NW or n[0:19] == txt.YOUTUBE_NNW or n[0:22] == txt.YOUTUBE_NWM or n[0:21]
+                                == txt.YOUTUBE_NNWM) and n.find("'") < 0 and n.find(' ') < 0:
         await state.finish()
         data = strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='message',
                                                             table='messages', where_column='user_id', flag=True)))
@@ -700,8 +704,9 @@ async def add_docs_card(message: types.Message, state: FSMContext):
 
     elif 22 < len(d) < 256 and (d[0:24] == txt.YOUTUBE_C or d[0:23] == txt.YOUTUBE_CN or d[0:22] == txt.YOUTUBE_CM or
                                 d[0:21] == txt.YOUTUBE_CMN or d[0:17] == txt.YOUTUBE_BEC or d[0:16] == txt.YOUTUBE_BECN
-                                or d[0:19] == txt.YOUTUBE_BEMC or d[0:18] == txt.YOUTUBE_BEMCN) and d.find("'") < 0 \
-            and d.find(' ') < 0:
+                                or d[0:19] == txt.YOUTUBE_BEMC or d[0:18] == txt.YOUTUBE_BEMCN or d[0:20] ==
+                                txt.YOUTUBE_NW or d[0:19] == txt.YOUTUBE_NNW or d[0:22] == txt.YOUTUBE_NWM or d[0:21]
+                                == txt.YOUTUBE_NNWM) and d.find("'") < 0 and d.find(' ') < 0:
         await state.finish()
         data = strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='message',
                                                             table='messages', where_column='user_id', flag=True)))
@@ -786,8 +791,9 @@ async def add_docs_address(message: types.Message, state: FSMContext):
 
     elif 22 < len(n) < 256 and (n[0:24] == txt.YOUTUBE_C or n[0:23] == txt.YOUTUBE_CN or n[0:22] == txt.YOUTUBE_CM or
                                 n[0:21] == txt.YOUTUBE_CMN or n[0:17] == txt.YOUTUBE_BEC or n[0:16] == txt.YOUTUBE_BECN
-                                or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN) and n.find("'") < 0 \
-            and n.find(' ') < 0:
+                                or n[0:19] == txt.YOUTUBE_BEMC or n[0:18] == txt.YOUTUBE_BEMCN or n[0:20] ==
+                                txt.YOUTUBE_NW or n[0:19] == txt.YOUTUBE_NNW or n[0:22] == txt.YOUTUBE_NWM or n[0:21]
+                                == txt.YOUTUBE_NNWM) and n.find("'") < 0 and n.find(' ') < 0:
         await state.finish()
         data = strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='message',
                                                             table='messages', where_column='user_id', flag=True)))
