@@ -1,6 +1,6 @@
-from con_db.Connect import Connect
-import data.sql_tables as sql
-import data.text as txt
+from src.con_db.Connect import Connect
+import src.data.sql_tables as sql
+import src.data.text as txt
 import time
 
 

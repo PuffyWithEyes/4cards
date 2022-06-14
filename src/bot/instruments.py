@@ -1,5 +1,5 @@
 """ Refactor data """
-from con_db.actions_db import UpdateInfo, FindUser
+from src.con_db.actions_db import UpdateInfo, FindUser
 from aiogram import types
 
 

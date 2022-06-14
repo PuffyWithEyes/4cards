@@ -1,4 +1,4 @@
-from con_db.Connect import Connect
+from src.con_db.Connect import Connect
 
 
 class FindUser(Connect):

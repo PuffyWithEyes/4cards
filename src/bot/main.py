@@ -1,17 +1,18 @@
+# /usr/bin/env python3.9
 # Script for python version 3.9 and for Debian Linux
 from aiogram import Bot, Dispatcher, executor, types
-from bot.config import TOKEN, RED_ADMIN, RED_ADMIN_PASSWORD
+from src.bot.config import TOKEN, RED_ADMIN, RED_ADMIN_PASSWORD
 from aiogram.dispatcher.filters import Text
-import data.markup as nav
+import src.data.markup as nav
 from aiogram.dispatcher import FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from con_db.actions_db import FindUser, AddUser, DeleteInfo, UpdateInfo
+from src.con_db.actions_db import FindUser, AddUser, DeleteInfo, UpdateInfo
 import states
-import data.text as txt
+import src.data.text as txt
 from instruments import strip_all, strip_list, check_place, strip_alist, strip_report, s_none, c_none, social_rating
-from con_db.ClearMessages import ClearMessages
-from con_db.Create import Create
-from bot.instruments import strip_parentheses
+from src.con_db.ClearMessages import ClearMessages
+from src.con_db.Create import Create
+from src.bot.instruments import strip_parentheses
 
 
 # Global settings for the bot

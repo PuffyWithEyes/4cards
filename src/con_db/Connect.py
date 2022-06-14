@@ -1,6 +1,6 @@
 import psycopg2
-import bot.config as cfg
-from con_db.exceptions import ConnectionException
+import src.bot.config as cfg
+from src.con_db.exceptions import ConnectionException
 
 
 class Connect:
