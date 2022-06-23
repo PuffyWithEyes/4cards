@@ -267,7 +267,64 @@ async def delete_user(message: types.Message, state: FSMContext):
         await state.finish()
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
     elif n.isdigit():
-        await message.answer('В разработке')
+        find = strip_parentheses(str(connect.find_matches_where_one(find_column='*', table='cards_true',
+                                                                    where_column='id', data=int(n), flag=True)))
+        if str(find) != "['None']":
+            await state.finish()
+            await message.answer(f"ID админа, занёсшего пользователя в чёрный список: "
+                                 f"{find[-1]}\nПричина, по которой выбранного пользователя занесли в чёрный "
+                                 f"""список: {find[-3].replace("'", '')}\n\nПродолжить подачу жалобы?""",
+                                 reply_markup=nav.yesno_menu)
+            delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
+            add.add_two(first_value=int(message.from_user.id), second_value=n, first_column='user_id',
+                        second_column='message', table='messages')
+            await states.Continue.c.set()
+        else:
+            await message.answer(txt.ID_NFIND)
+    else:
+        await message.reply(txt.ELSE_TEXT)
+
+
+@dp.message_handler(state=states.Continue.c)
+async def continue_(message: types.Message, state: FSMContext):
+    """ Asking for a sequel """
+    c = message.text
+    if c == '❌Отменить действие':
+        await state.finish()
+        delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
+        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
+    elif c == '👍Да':
+        await state.finish()
+        await message.answer(txt.DOC_TEXT, reply_markup=nav.o_cancel_menu)
+        await states.AddDocsDelete.a.set()
+    elif c == '👎Нет':
+        await state.finish()
+        delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
+        await message.answer(txt.BACK_TEXT, reply_markup=nav.main_menu)
+
+
+@dp.message_handler(state=states.AddDocsDelete.a)
+async def add_docs_delete(message: types.Message, state: FSMContext):
+    """ Function for adding evidence for removal from the black list """
+    a = message.text
+    if a == '❌Отменить действие':
+        await state.finish()
+        delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
+        await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
+    elif 22 < len(a) < 256 and (a[0:24] == txt.YOUTUBE_C or a[0:23] == txt.YOUTUBE_CN or a[0:22] == txt.YOUTUBE_CM or
+                                a[0:21] == txt.YOUTUBE_CMN or a[0:17] == txt.YOUTUBE_BEC or a[0:16] == txt.YOUTUBE_BECN
+                                or a[0:19] == txt.YOUTUBE_BEMC or a[0:18] == txt.YOUTUBE_BEMCN or a[0:20] ==
+                                txt.YOUTUBE_NW or a[0:19] == txt.YOUTUBE_NNW or a[0:22] == txt.YOUTUBE_NWM or a[0:21]
+                                == txt.YOUTUBE_NNWM) and a.find("'") < 0 and a.find(' ') < 0:
+        await state.finish()
+        data = strip_all(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='message',
+                                                            table='messages', where_column='user_id', flag=True)))
+        add.add_two(first_value=a, second_value=data, first_column='docers',
+                    second_column='delete', table='cards_report')
+        delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
+        await message.answer(txt.DOCS_TEXT, reply_markup=nav.main_menu)
+    else:
+        await message.reply(txt.ELSE_TEXT)
 
 
 @dp.message_handler(state=states.DoReport.r)
@@ -370,6 +427,7 @@ async def ask_info_vk(message: types.Message, state: FSMContext):
 
     elif y == '❌Отменить действие':
         await state.finish()
+        delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
 
     else:
@@ -458,6 +516,7 @@ async def add_info_tg(message: types.Message, state: FSMContext):
 
     elif y == '❌Отменить действие':
         await state.finish()
+        delete.delete_where(data=int(message.from_user.id), table='messages', column='user_id')
         await message.answer(txt.CANCEL_TEXT, reply_markup=nav.selections_menu)
 
     else:
@@ -984,13 +1043,15 @@ async def admin(message: types.Message, state: FSMContext):
                                                                              flag=True)) == '(False,)':
         report = strip_parentheses(str(connect.find_matches_where_one(data=m[1], find_column='*', table='cards_report',
                                                                       where_column='id', flag=True)))
-        if str(report) != "['[]']":
-            await message.answer(f"""Такой репорт доступен!\n
+        delete_id = report[-2]
+        if str(report) != "['[]']" and delete_id is None:
+            await state.finish()
+            await message.answer(f"""ЭТО РПЕОРТ НА ДОБАВЛЕНИЕ ЧЕЛОВЕКА В ЧЁРНЫЙ СПИСОК!\n
             Номер телефона человека: {report[1].replace("'", '')}
             Номер карты человека: {report[2].replace("'", '')}
             Ссылка на ВКонтакте: {report[3].replace("'", '')}
             ID в Telegram: {report[4].replace("'", '')}
-            Имеющийся ID в БАЗЕ ДАННЫХ: {report[6].replace("'", '')}
+            Имеющийся ID в БАЗЕ ДАННЫХ (Информация дополнится к ЧС-нику): {report[6].replace("'", '')}
             Адрес человека: {report[10].replace("'", '')}
             \nДоказательства (ПЕРЕХОДИТЕ ТОЛЬКО ПО ЮТУБ ССЫЛКАМ, ЭТО СДЕЛАНО ДЛЯ ВАШЕЙ БЕЗОПАСНОСТИ!): 
         {report[5].replace("'", '')}\n
@@ -1001,15 +1062,72 @@ async def admin(message: types.Message, state: FSMContext):
                                 table='cards_report')
             update.update_where(data_what=int(message.from_user.id), data_where=m[1], table_what='admin_take',
                                 table_where='id', table='cards_report')
+            await states.AcceptAdd.a.set()
+        elif str(report) != "['[]']" and delete_id is not None and delete_id.isdigit():
             await state.finish()
-            await states.Accept.a.set()
+            all_data = connect.find_matches_where_one(find_column='*', table='cards_true', where_column='id',
+                                                      data=int(delete_id), flag=False)
+            await message.answer(f"""ЭТО РПЕОРТ НА УДАЛЕНИЕ ЧЕЛОВЕКА ИЗ ЧЁРНОГО СПИСКА\n
+            ID человека в базе данных: {int(delete_id)}
+            Номер телефона человека: {all_data[2].replace("'", '')}
+            Номер карты человека: {all_data[3].replace("'", '')}
+            Ссылка на ВКонтакте: {all_data[4].replace("'", '')}
+            ID в Telegram: {all_data[5].replace("'", '')}
+            Адрес человека: {all_data[-2].replace("'", '')}
+            \nПричина, по которой человек был занесён в ЧС (ПЕРЕХОДИТЕ ТОЛЬКО ПО ЮТУБ ССЫЛКАМ, ЭТО СДЕЛАНО ДЛЯ ВАШЕЙ
+             БЕЗОПАСНОСТИ!): {all_data[-3].replace("'", '')}
+             Доказательства предоставленные человеком, для вынесения: {report[5].replace("'", '')}\n
+/accept - принять жалобу (Если форма заполнена правильно и док-ва не являются подделкой)
+/cancel - отвергнуть жалобу (Если форма заполнена неправильно и док-ва являются подделкой)
+/acrib - шпаргалка по заполнению пунктов""")
+            update.update_where(data_what=True, data_where=m[1], table_what='take', table_where='id',
+                                table='cards_report')
+            update.update_where(data_what=int(message.from_user.id), data_where=m[1], table_what='admin_take',
+                                table_where='id', table='cards_report')
+            await states.AcceptDelete.a.set()
         else:
             await message.answer(txt.NOT_REPORT_TEXT)
     else:
         await message.answer(txt.NOT_REPORT_TEXT)
 
 
-@dp.message_handler(commands='accept', state=states.Accept.a)
+@dp.message_handler(commands='check', state=states.Apanel.a)
+async def a_check(message: types.Message):
+    """ Function to check scammer data in database """
+    c = message.text
+    c = c.split(' ')
+    if len(c) == 2 and c[1].isdigit():
+        data = strip_parentheses(str(connect.find_matches_where_one(find_column='*', table='cards_true',
+                                                                    where_column='id', data=int(c[1]), flag=True)))
+        if str(data) != "['None']":
+            await message.answer(f"""Номер телефона: {data[1].replace("'", '')}
+Номер карты: {data[2].replace("'", '')}
+Ссылка во ВКонтакте: {data[3].replace("'", '')}
+ID в Telegram: {data[4].replace("'", '')}
+Адрес: {data[6].replace("'", '')}
+Причина: {data[-3].replace("'", '')}
+Админ, рассмотревший жалобу: {data[-1].replace("'", '')}""")
+        else:
+            await message.answer('Такой ID отсутствует!')
+    else:
+        await message.answer('Неправильный формат сообщения!')
+
+
+@dp.message_handler(commands='accept', state=states.AcceptDelete.a)
+async def accept_report_delete(message: types.Message, state: FSMContext):
+    """ Function for accepting report """
+    report = strip_parentheses(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='*',
+                                                                  table='cards_report', where_column='admin_take',
+                                                                  flag=True)))
+    delete.delete_where(table='cards_true', column='id', data=int(report[-2]))
+    delete.delete_where(data=int(message.from_user.id), column='admin_take', table='cards_report')
+    await social_rating(message)
+    await state.finish()
+    await states.Apanel.a.set()
+    await message.answer('Репорт был одобрен!')
+
+
+@dp.message_handler(commands='accept', state=states.AcceptAdd.a)
 async def accept_report(message: types.Message, state: FSMContext):
     """ Function for accepting report """
     report = strip_parentheses(str(connect.find_matches_where_one(data=int(message.from_user.id), find_column='*',
@@ -1028,7 +1146,7 @@ async def accept_report(message: types.Message, state: FSMContext):
     await message.answer('Репорт был одобрен!')
 
 
-@dp.message_handler(commands='cancel', state=states.Accept.a)
+@dp.message_handler(commands='cancel', state=[states.AcceptAdd.a, states.AcceptDelete.a])
 async def cancel_report(message: types.Message, state: FSMContext):
     """ Function for cancel report """
     await state.finish()
@@ -1038,7 +1156,7 @@ async def cancel_report(message: types.Message, state: FSMContext):
     await message.answer('Репорт был отклонён!')
 
 
-@dp.message_handler(commands='change', state=states.Accept.a)
+@dp.message_handler(commands='change', state=[states.AcceptAdd.a, states.AcceptDelete.a])
 async def change_report(message: types.Message):
     """ Function for change data of report """
     a = message.text
@@ -1074,7 +1192,7 @@ async def change_report(message: types.Message):
         await message.answer(txt.WRONG_TEXT)
 
 
-@dp.message_handler(commands='acrib', state=states.Accept.a)
+@dp.message_handler(commands='acrib', state=[states.AcceptAdd.a, states.Apanel.a, states.AcceptDelete.a])
 async def change_report(message: types.Message):
     """ Crib for admins """
     await message.answer(txt.CRIB)

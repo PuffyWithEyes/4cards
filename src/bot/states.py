@@ -94,7 +94,7 @@ class Sudo(StatesGroup):
     s = State()
 
 
-class Accept(StatesGroup):
+class AcceptAdd(StatesGroup):
     a = State()
 
 
@@ -136,3 +136,15 @@ class YesNoAddress(StatesGroup):
 
 class NoAddress(StatesGroup):
     n = State()
+
+
+class AddDocsDelete(StatesGroup):
+    a = State()
+
+
+class AcceptDelete(StatesGroup):
+    a = State()
+
+
+class Continue(StatesGroup):
+    c = State()
