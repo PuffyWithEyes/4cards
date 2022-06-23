@@ -1,4 +1,4 @@
-# /usr/bin/env python3.9
+#! /usr/bin/env python3.9
 # Script for python version 3.9 and for Debian Linux
 from aiogram import Bot, Dispatcher, executor, types
 from src.bot.config import TOKEN, RED_ADMIN, RED_ADMIN_PASSWORD
