@@ -1,7 +1,7 @@
 #! /usr/bin/env python3.9
 # Script for python version 3.9 and for Debian Linux
 from aiogram import Bot, Dispatcher, executor, types
-from src.bot.config import TOKEN, RED_ADMIN, RED_ADMIN_PASSWORD
+from src.bot.config import TOKEN, RED_ADMIN_0, RED_ADMIN_PASSWORD_0, RED_ADMIN_1, RED_ADMIN_PASSWORD_1
 from aiogram.dispatcher.filters import Text
 import src.data.markup as nav
 from aiogram.dispatcher import FSMContext
