@@ -876,7 +876,7 @@ async def a_help(message: types.Message):
         await message.answer(txt.ACCESS_TEXT)
 
 
-@dp.message_handler(commands='sudo')
+@dp.message_handler(commands='sudo')  # Refactor this line and .env if you want add red admin
 async def set_admin(message: types.Message, state: FSMContext):
     """ Function for set admins in database """
     await state.reset_state()
