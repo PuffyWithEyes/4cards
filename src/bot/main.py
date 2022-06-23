@@ -891,7 +891,7 @@ async def set_admin(message: types.Message, state: FSMContext):
 async def enter_admin_password(message: types.Message, state: FSMContext):
     """ Function for sudo admin """
     s = message.text
-    if str(s) == str(RED_ADMIN_PASSWORD):
+    if str(s) == str(RED_ADMIN_PASSWORD):  # And this line
         await state.finish()
         await states.Sudo.s.set()
         await message.answer(txt.SET_ADMIN_TEXT)
