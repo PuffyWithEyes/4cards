@@ -876,11 +876,12 @@ async def a_help(message: types.Message):
         await message.answer(txt.ACCESS_TEXT)
 
 
-@dp.message_handler(commands='sudo')  # Refactor this line and .env if you want add red admin
+@dp.message_handler(commands='sudo')
 async def set_admin(message: types.Message, state: FSMContext):
     """ Function for set admins in database """
     await state.reset_state()
-    if int(message.from_user.id) == int(RED_ADMIN):
+        if int(message.from_user.id) == (int(RED_ADMIN_0) or int(RED_ADMIN_1)):  # Refactor this line and .env if you want
+        # ...remove or add red admin
         await states.SetAdminPassword.s.set()
         await message.answer(txt.SUDO_TEXT, reply_markup=nav.remove_markup)
     else:
@@ -891,7 +892,7 @@ async def set_admin(message: types.Message, state: FSMContext):
 async def enter_admin_password(message: types.Message, state: FSMContext):
     """ Function for sudo admin """
     s = message.text
-    if str(s) == str(RED_ADMIN_PASSWORD):  # And this line
+    if str(s) == (str(RED_ADMIN_PASSWORD_0) or str(RED_ADMIN_PASSWORD_1)):  # And this line
         await state.finish()
         await states.Sudo.s.set()
         await message.answer(txt.SET_ADMIN_TEXT)
@@ -925,6 +926,9 @@ async def sudo(message: types.Message, state: FSMContext):
         update.update_where(table='admin_panel', table_what='user_password', data_what='', table_where='user_id',
                             data_where=int(m[2]))
         await message.answer(txt.PASSWD_TEXT)
+    elif m[1] == 'q':
+        await state.finish()
+        await message.answer(txt.QUIT_TEXT, reply_markup=nav.main_menu)
     else:
         await state.finish()
         await message.answer(txt.ACCESS_TEXT)
