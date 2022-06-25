@@ -97,7 +97,7 @@ INCORRECT_TEXT = 'Пароль неверный!'
 SUDO_TEXT = '[INFO] Enter your sudo password:'
 SET_ADMIN_TEXT = "[INFO] Use following commands:\n/sudo {add|delete} {administrator ID} - add or remove administrator" \
                  " to database\n/sudo {all} - View the entire list of administrators and all information about them\n" \
-                 "/sudo {passwd} {Admin ID} - reset admin password"
+                 "/sudo {passwd} {Admin ID} - reset admin password\n/sudo {q} - log out"
 ADD_ADMIN_TEXT = '[INFO] Administrator successfully added to database'
 DELETE_ADMIN_TEXT = '[INFO] Administrator successfully removed from database'
 DONE_TEXT = '[INFO] Done!'
@@ -121,3 +121,4 @@ CRIB = 'ВСЕГДА ПРОВЕРЯЕМ СХОДСТВА ДАННЫХ В ЖАЛ�
        'https://www.youtube.com/watch?v=dQw4w9WgXcQ\n\nОбязательно проверяйте видео на подлинность!'
 PASSWD_TEXT = '[INFO] The admin password has been successfully updated!'
 ID_NFIND = '💿Такой ID отсутствует в базе данных мошенников!'
+QUIT_TEXT = '[INFO] You are logged out of your super user account!'

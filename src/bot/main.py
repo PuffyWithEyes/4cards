@@ -880,7 +880,7 @@ async def a_help(message: types.Message):
 async def set_admin(message: types.Message, state: FSMContext):
     """ Function for set admins in database """
     await state.reset_state()
-        if int(message.from_user.id) == (int(RED_ADMIN_0) or int(RED_ADMIN_1)):  # Refactor this line and .env if you want
+    if int(message.from_user.id) == (int(RED_ADMIN_0) or int(RED_ADMIN_1)):  # Refactor this line and .env if you want
         # ...remove or add red admin
         await states.SetAdminPassword.s.set()
         await message.answer(txt.SUDO_TEXT, reply_markup=nav.remove_markup)
